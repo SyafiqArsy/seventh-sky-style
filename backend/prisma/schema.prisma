@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum SkinTone {
+  FAIR
+  LIGHT
+  MEDIUM
+  TAN
+  DEEP
+}
+
+enum BudgetRange {
+  LESS_THAN_250K
+  BETWEEN_250K_500K
+  BETWEEN_500K_1M
+  ABOVE_1M
+}
+
+enum OutfitItemRole {
+  TOP
+  BOTTOM
+  OUTER
+  FOOTWEAR
+  ACCESSORY
+}
+
+model User {
+  id       String  @id @default(cuid())
+  name     String
+  email    String  @unique
+  password String?
+  avatar   String?
+
+  role     Role         @default(USER)
+  provider AuthProvider @default(LOCAL)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile UserProfile?
+
+  @@map("users")
+}
+
+model UserProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  gender Gender
+  age    Int
+
+  height Float
+  weight Float
+
+  skinTone SkinTone
+
+  favoriteColorId String
+  favoriteColor   Color  @relation(fields: [favoriteColorId], references: [id])
+
+  preferredStyleId String
+  preferredStyle   Style  @relation(fields: [preferredStyleId], references: [id])
+
+  budgetRange BudgetRange
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model Style {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userProfiles UserProfile[]
+
+  fashionItems FashionItem[]
+  outfits      Outfit[]
+
+  @@map("styles")
+}
+
+model Color {
+  id      String @id @default(cuid())
+  name    String @unique
+  hexCode String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userProfiles UserProfile[]
+
+  fashionItems FashionItem[]
+
+  @@map("colors")
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fashionItems FashionItem[]
+
+  @@map("categories")
+}
+
+model Occasion {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  outfits Outfit[]
+
+  @@map("occasions")
+}
+
+model BodyType {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  outfits Outfit[]
+
+  @@map("body_types")
+}
+
+model FashionItem {
+  id String @id @default(cuid())
+
+  name        String
+  description String?
+
+  gender Gender
+
+  price Decimal @db.Decimal(12, 2)
+
+  imageUrl String?
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  styleId String
+  style   Style  @relation(fields: [styleId], references: [id])
+
+  colorId String
+  color   Color  @relation(fields: [colorId], references: [id])
+
+  outfitItems OutfitItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("fashion_items")
+}
+
+model Outfit {
+  id String @id @default(cuid())
+
+  name        String
+  description String?
+
+  gender Gender
+
+  budgetRange BudgetRange
+
+  imageUrl String?
+
+  styleId String
+  style   Style  @relation(fields: [styleId], references: [id])
+
+  occasionId String
+  occasion   Occasion @relation(fields: [occasionId], references: [id])
+
+  bodyTypeId String
+  bodyType   BodyType @relation(fields: [bodyTypeId], references: [id])
+
+  outfitItems OutfitItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("outfits")
+}
+
+model OutfitItem {
+  id String @id @default(cuid())
+
+  role OutfitItemRole
+
+  outfitId String
+  outfit   Outfit @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+
+  fashionItemId String
+  fashionItem   FashionItem @relation(fields: [fashionItemId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("outfit_items")
+}

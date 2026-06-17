@@ -16,7 +16,8 @@ import { BodyTypesModule } from './modules/body-types/body-types.module';
 import { FashionItemsModule } from './modules/fashion-items/fashion-items.module';
 import { OutfitsModule } from './modules/outfits/outfits.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
-    
+import { JwtModule } from '@nestjs/jwt';
+
 
 @Module({
   imports: [
@@ -35,6 +36,9 @@ import { RecommendationsModule } from './modules/recommendations/recommendations
     FashionItemsModule,
     OutfitsModule,
     RecommendationsModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

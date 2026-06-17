@@ -5,6 +5,18 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
+import { StylesModule } from './modules/styles/styles.module';
+import { ColorsModule } from './modules/colors/colors.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { OccasionsModule } from './modules/occasions/occasions.module';
+import { BodyTypesModule } from './modules/body-types/body-types.module';
+import { FashionItemsModule } from './modules/fashion-items/fashion-items.module';
+import { OutfitsModule } from './modules/outfits/outfits.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+    
 
 @Module({
   imports: [
@@ -12,6 +24,17 @@ import { PrismaModule } from './prisma/prisma.module';
       isGlobal: true,
     }),
     PrismaModule,
+    AuthModule,
+    UsersModule,
+    ProfilesModule,
+    StylesModule,
+    ColorsModule,
+    CategoriesModule,
+    OccasionsModule,
+    BodyTypesModule,
+    FashionItemsModule,
+    OutfitsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

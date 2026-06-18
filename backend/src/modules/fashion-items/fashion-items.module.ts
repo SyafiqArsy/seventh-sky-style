@@ -1,4 +1,15 @@
 import { Module } from '@nestjs/common';
 
-@Module({})
+import { FashionItemsController } from './fashion-items.controller';
+import { FashionItemsService } from './fashion-items.service';
+
+@Module({
+  controllers: [
+    FashionItemsController,
+  ],
+
+  providers: [
+    FashionItemsService,
+  ],
+})
 export class FashionItemsModule {}

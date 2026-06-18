@@ -167,6 +167,7 @@ model FashionItem {
 
   name        String
   description String?
+  slug String @unique
 
   gender Gender
 
@@ -185,6 +186,8 @@ model FashionItem {
 
   outfitItems OutfitItem[]
 
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -196,6 +199,7 @@ model Outfit {
 
   name        String
   description String?
+  slug String @unique
 
   gender Gender
 
@@ -213,6 +217,8 @@ model Outfit {
   bodyType   BodyType @relation(fields: [bodyTypeId], references: [id])
 
   outfitItems OutfitItem[]
+
+  isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -232,6 +238,8 @@ model OutfitItem {
   fashionItem   FashionItem @relation(fields: [fashionItemId], references: [id])
 
   createdAt DateTime @default(now())
+
+  @@unique([outfitId, role])
 
   @@map("outfit_items")
 }

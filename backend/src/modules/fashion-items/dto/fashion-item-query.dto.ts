@@ -1,24 +1,44 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
+import {
+  IsOptional,
+  IsString,
+  IsNumberString,
+} from 'class-validator';
+
 export class FashionItemQueryDto {
   @ApiPropertyOptional()
-  page?: number;
+  @IsOptional()
+  @IsNumberString()
+  page?: string;
 
   @ApiPropertyOptional()
-  limit?: number;
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   search?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   categoryId?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   styleId?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   gender?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   isActive?: string;
 }

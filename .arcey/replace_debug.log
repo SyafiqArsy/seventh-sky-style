@@ -1,0 +1,1331 @@
+
+--- 2026-06-18T05:50:29.155Z ---
+PATH: backend/src/modules/categories/categories.module.ts
+OLD_STR (normalized):
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CategoriesController } from './categories.controller';
+import { CategoriesService } from './categories.service';
+import { Category } from './entities/category.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Category])],
+  controllers: [CategoriesController],
+  providers: [CategoriesService],
+  exports: [CategoriesService],
+})
+export class CategoriesModule {}
+
+NEW_STR (normalized):
+import { Module } from '@nestjs/common';
+import { CategoriesController } from './categories.controller';
+import { CategoriesService } from './categories.service';
+
+@Module({
+  controllers: [CategoriesController],
+  providers: [CategoriesService],
+  exports: [CategoriesService],
+})
+export class CategoriesModule {}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CategoriesController } from './categories.controller';
+import { CategoriesService } from './categories.service';
+import { Category } from './entities/category.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Category])],
+  controllers: [CategoriesController],
+  providers: [CategoriesService],
+  exports: [CategoriesService],
+})
+export class CategoriesModule {}
+
+FILE_LENGTH: 470 chars
+OLD_STR_LENGTH: 470 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:50:36.089Z ---
+PATH: backend/src/modules/categories/categories.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from './entities/category.entity';
+
+@Injectable()
+export class CategoriesService {
+  constructor(
+    @InjectRepository(Category)
+    private categoriesRepository: Repository<Category>,
+  ) {}
+
+  async findAll(): Promise<Category[]> {
+    return this.categoriesRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+}
+
+NEW_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class CategoriesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.category.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from './entities/category.entity';
+
+@Injectable()
+export class CategoriesService {
+  constructor(
+    @InjectRepository(Category)
+    private categoriesRepository: Repository<Category>,
+  ) {}
+
+  async findAll(): Promise<Category[]> {
+    return this.categoriesRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+}
+
+FILE_LENGTH: 478 chars
+OLD_STR_LENGTH: 478 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:50:44.403Z ---
+PATH: backend/src/modules/categories/categories.controller.ts
+OLD_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { Public } from '../../common/decorators/public.decorator';
+
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Get()
+  @Public()
+  async findAll() {
+    return this.categoriesService.findAll();
+  }
+}
+
+NEW_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { CategoriesService } from './categories.service';
+
+@ApiTags('Categories')
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Get()
+  async findAll() {
+    return this.categoriesService.findAll();
+  }
+}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get } from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { Public } from '../../common/decorators/public.decorator';
+
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Get()
+  @Public()
+  async findAll() {
+    return this.categoriesService.findAll();
+  }
+}
+
+FILE_LENGTH: 403 chars
+OLD_STR_LENGTH: 403 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:51:05.801Z ---
+PATH: backend/src/modules/occasions/occasions.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Occasion } from './entities/occasion.entity';
+
+@Injectable()
+export class OccasionsService {
+  constructor(
+    @InjectRepository(Occasion)
+    private occasionsRepository: Repository<Occasion>,
+  ) {}
+
+  async findAll(): Promise<Occasion[]> {
+    return this.occasionsRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+}
+
+NEW_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class OccasionsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.occasion.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Occasion } from './entities/occasion.entity';
+
+@Injectable()
+export class OccasionsService {
+  constructor(
+    @InjectRepository(Occasion)
+    private occasionsRepository: Repository<Occasion>,
+  ) {}
+
+  async findAll(): Promise<Occasion[]> {
+    return this.occasionsRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+}
+
+FILE_LENGTH: 475 chars
+OLD_STR_LENGTH: 475 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:51:12.213Z ---
+PATH: backend/src/modules/occasions/occasions.controller.ts
+OLD_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { OccasionsService } from './occasions.service';
+import { Public } from '../../common/decorators/public.decorator';
+
+@Controller('occasions')
+export class OccasionsController {
+  constructor(private readonly occasionsService: OccasionsService) {}
+
+  @Get()
+  @Public()
+  async findAll() {
+    return this.occasionsService.findAll();
+  }
+}
+
+NEW_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { OccasionsService } from './occasions.service';
+
+@ApiTags('Occasions')
+@Controller('occasions')
+export class OccasionsController {
+  constructor(private readonly occasionsService: OccasionsService) {}
+
+  @Get()
+  async findAll() {
+    return this.occasionsService.findAll();
+  }
+}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get } from '@nestjs/common';
+import { OccasionsService } from './occasions.service';
+import { Public } from '../../common/decorators/public.decorator';
+
+@Controller('occasions')
+export class OccasionsController {
+  constructor(private readonly occasionsService: OccasionsService) {}
+
+  @Get()
+  @Public()
+  async findAll() {
+    return this.occasionsService.findAll();
+  }
+}
+
+FILE_LENGTH: 396 chars
+OLD_STR_LENGTH: 396 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:51:32.968Z ---
+PATH: backend/src/modules/body-types/body-types.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BodyType } from './entities/body-type.entity';
+
+@Injectable()
+export class BodyTypesService {
+  constructor(
+    @InjectRepository(BodyType)
+    private bodyTypesRepository: Repository<BodyType>,
+  ) {}
+
+  async findAll(): Promise<BodyType[]> {
+    return this.bodyTypesRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+}
+
+NEW_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class BodyTypesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.bodyType.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BodyType } from './entities/body-type.entity';
+
+@Injectable()
+export class BodyTypesService {
+  constructor(
+    @InjectRepository(BodyType)
+    private bodyTypesRepository: Repository<BodyType>,
+  ) {}
+
+  async findAll(): Promise<BodyType[]> {
+    return this.bodyTypesRepository.find({
+      order: { name: 'ASC' },
+    });
+  }
+}
+
+FILE_LENGTH: 476 chars
+OLD_STR_LENGTH: 476 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:51:40.042Z ---
+PATH: backend/src/modules/body-types/body-types.controller.ts
+OLD_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { BodyTypesService } from './body-types.service';
+import { Public } from '../../common/decorators/public.decorator';
+
+@Controller('body-types')
+export class BodyTypesController {
+  constructor(private readonly bodyTypesService: BodyTypesService) {}
+
+  @Get()
+  @Public()
+  async findAll() {
+    return this.bodyTypesService.findAll();
+  }
+}
+
+NEW_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { BodyTypesService } from './body-types.service';
+
+@ApiTags('Body Types')
+@Controller('body-types')
+export class BodyTypesController {
+  constructor(private readonly bodyTypesService: BodyTypesService) {}
+
+  @Get()
+  async findAll() {
+    return this.bodyTypesService.findAll();
+  }
+}
+
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get } from '@nestjs/common';
+import { BodyTypesService } from './body-types.service';
+import { Public } from '../../common/decorators/public.decorator';
+
+@Controller('body-types')
+export class BodyTypesController {
+  constructor(private readonly bodyTypesService: BodyTypesService) {}
+
+  @Get()
+  @Public()
+  async findAll() {
+    return this.bodyTypesService.findAll();
+  }
+}
+
+FILE_LENGTH: 398 chars
+OLD_STR_LENGTH: 398 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:56:49.532Z ---
+PATH: backend/src/modules/colors/colors.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class ColorsService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async findAll() {
+    return this.prisma.color.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+NEW_STR (normalized):
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@Injectable()
+export class ColorsService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async findAll() {
+    return this.prisma.color.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    const color = await this.prisma.color.findUnique({
+      where: { id },
+    });
+
+    if (!color) {
+      throw new NotFoundException(`Color with ID ${id} not found`);
+    }
+
+    return color;
+  }
+
+  async create(createColorDto: CreateColorDto) {
+    return this.prisma.color.create({
+      data: createColorDto,
+    });
+  }
+
+  async update(id: number, updateColorDto: UpdateColorDto) {
+    await this.findOne(id);
+
+    return this.prisma.color.update({
+      where: { id },
+      data: updateColorDto,
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+
+    return this.prisma.color.delete({
+      where: { id },
+    });
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class ColorsService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async findAll() {
+    return this.prisma.color.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+FILE_LENGTH: 337 chars
+OLD_STR_LENGTH: 337 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:56:58.547Z ---
+PATH: backend/src/modules/colors/colors.controller.ts
+OLD_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+
+import { ColorsService } from './colors.service';
+
+@ApiTags('Colors')
+@Controller('colors')
+export class ColorsController {
+  constructor(
+    private readonly colorsService: ColorsService,
+  ) {}
+
+  @Get()
+  async findAll() {
+    return this.colorsService.findAll();
+  }
+}
+NEW_STR (normalized):
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+import { ColorsService } from './colors.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@ApiTags('Colors')
+@Controller('colors')
+export class ColorsController {
+  constructor(
+    private readonly colorsService: ColorsService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all colors' })
+  @ApiResponse({ status: 200, description: 'Return all colors' })
+  async findAll() {
+    return this.colorsService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a color by ID' })
+  @ApiResponse({ status: 200, description: 'Return the color' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(+id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new color' })
+  @ApiResponse({ status: 201, description: 'Color created successfully' })
+  async create(@Body() createColorDto: CreateColorDto) {
+    return this.colorsService.create(createColorDto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a color' })
+  @ApiResponse({ status: 200, description: 'Color updated successfully' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async update(@Param('id') id: string, @Body() updateColorDto: UpdateColorDto) {
+    return this.colorsService.update(+id, updateColorDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a color' })
+  @ApiResponse({ status: 204, description: 'Color deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async remove(@Param('id') id: string) {
+    return this.colorsService.remove(+id);
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+
+import { ColorsService } from './colors.service';
+
+@ApiTags('Colors')
+@Controller('colors')
+export class ColorsController {
+  constructor(
+    private readonly colorsService: ColorsService,
+  ) {}
+
+  @Get()
+  async findAll() {
+    return this.colorsService.findAll();
+  }
+}
+FILE_LENGTH: 367 chars
+OLD_STR_LENGTH: 367 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:57:13.946Z ---
+PATH: backend/src/modules/styles/styles.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class StylesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.style.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+NEW_STR (normalized):
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateStyleDto } from './dto/create-style.dto';
+import { UpdateStyleDto } from './dto/update-style.dto';
+
+@Injectable()
+export class StylesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.style.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    const style = await this.prisma.style.findUnique({
+      where: { id },
+    });
+
+    if (!style) {
+      throw new NotFoundException(`Style with ID ${id} not found`);
+    }
+
+    return style;
+  }
+
+  async create(createStyleDto: CreateStyleDto) {
+    return this.prisma.style.create({
+      data: createStyleDto,
+    });
+  }
+
+  async update(id: number, updateStyleDto: UpdateStyleDto) {
+    await this.findOne(id);
+
+    return this.prisma.style.update({
+      where: { id },
+      data: updateStyleDto,
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+
+    return this.prisma.style.delete({
+      where: { id },
+    });
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class StylesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.style.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+FILE_LENGTH: 328 chars
+OLD_STR_LENGTH: 328 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T05:59:29.329Z ---
+PATH: backend/src/modules/styles/styles.controller.ts
+OLD_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+
+import { StylesService } from './styles.service';
+
+@ApiTags('Styles')
+@Controller('styles')
+export class StylesController {
+  constructor(
+    private readonly stylesService: StylesService,
+  ) {}
+
+  @Get()
+  async findAll() {
+    return this.stylesService.findAll();
+  }
+}
+NEW_STR (normalized):
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+import { StylesService } from './styles.service';
+import { CreateStyleDto } from './dto/create-style.dto';
+import { UpdateStyleDto } from './dto/update-style.dto';
+
+@ApiTags('Styles')
+@Controller('styles')
+export class StylesController {
+  constructor(
+    private readonly stylesService: StylesService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all styles' })
+  @ApiResponse({ status: 200, description: 'Return all styles' })
+  async findAll() {
+    return this.stylesService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a style by ID' })
+  @ApiResponse({ status: 200, description: 'Return the style' })
+  @ApiResponse({ status: 404, description: 'Style not found' })
+  async findOne(@Param('id') id: string) {
+    return this.stylesService.findOne(+id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new style' })
+  @ApiResponse({ status: 201, description: 'Style created successfully' })
+  async create(@Body() createStyleDto: CreateStyleDto) {
+    return this.stylesService.create(createStyleDto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a style' })
+  @ApiResponse({ status: 200, description: 'Style updated successfully' })
+  @ApiResponse({ status: 404, description: 'Style not found' })
+  async update(@Param('id') id: string, @Body() updateStyleDto: UpdateStyleDto) {
+    return this.stylesService.update(+id, updateStyleDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a style' })
+  @ApiResponse({ status: 204, description: 'Style deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Style not found' })
+  async remove(@Param('id') id: string) {
+    return this.stylesService.remove(+id);
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+
+import { StylesService } from './styles.service';
+
+@ApiTags('Styles')
+@Controller('styles')
+export class StylesController {
+  constructor(
+    private readonly stylesService: StylesService,
+  ) {}
+
+  @Get()
+  async findAll() {
+    return this.stylesService.findAll();
+  }
+}
+FILE_LENGTH: 367 chars
+OLD_STR_LENGTH: 367 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:46.078Z ---
+PATH: backend\src\modules\colors\colors.service.ts
+OLD_STR (normalized):
+  async findOne(id: number) {
+    const color = await this.prisma.color.findUnique({
+      where: { id },
+    });
+NEW_STR (normalized):
+  async findOne(id: string) {
+    const color = await this.prisma.color.findUnique({
+      where: { id },
+    });
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@Injectable()
+export class ColorsService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async findAll() {
+    return this.prisma.color.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    const color = await this.prisma.color.findUnique({
+      where: { id },
+    });
+
+    if (!color) {
+      throw new NotFoundException(`Color with ID ${id} not found`);
+    }
+
+    return color;
+  }
+
+  async create(createColorDto: CreateColorDto) {
+    return this.prisma.color.create({
+      data: createColorDto,
+    });
+  }
+
+  async update(id: number, updateColorDto: UpdateColorDto) {
+    await this.findOne(id);
+
+    return this.prisma.color.update({
+      where: { id },
+      data: updateColo
+FILE_LENGTH: 1149 chars
+OLD_STR_LENGTH: 113 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:46.111Z ---
+PATH: backend\src\modules\colors\colors.service.ts
+OLD_STR (normalized):
+  async update(id: number, updateColorDto: UpdateColorDto) {
+NEW_STR (normalized):
+  async update(id: string, updateColorDto: UpdateColorDto) {
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@Injectable()
+export class ColorsService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async findAll() {
+    return this.prisma.color.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    const color = await this.prisma.color.findUnique({
+      where: { id },
+    });
+
+    if (!color) {
+      throw new NotFoundException(`Color with ID ${id} not found`);
+    }
+
+    return color;
+  }
+
+  async create(createColorDto: CreateColorDto) {
+    return this.prisma.color.create({
+      data: createColorDto,
+    });
+  }
+
+  async update(id: number, updateColorDto: UpdateColorDto) {
+    await this.findOne(id);
+
+    return this.prisma.color.update({
+      where: { id },
+      data: updateColo
+FILE_LENGTH: 1149 chars
+OLD_STR_LENGTH: 60 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:46.143Z ---
+PATH: backend\src\modules\colors\colors.service.ts
+OLD_STR (normalized):
+  async remove(id: number) {
+NEW_STR (normalized):
+  async remove(id: string) {
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@Injectable()
+export class ColorsService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async findAll() {
+    return this.prisma.color.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    const color = await this.prisma.color.findUnique({
+      where: { id },
+    });
+
+    if (!color) {
+      throw new NotFoundException(`Color with ID ${id} not found`);
+    }
+
+    return color;
+  }
+
+  async create(createColorDto: CreateColorDto) {
+    return this.prisma.color.create({
+      data: createColorDto,
+    });
+  }
+
+  async update(id: string, updateColorDto: UpdateColorDto) {
+    await this.findOne(id);
+
+    return this.prisma.color.update({
+      where: { id },
+      data: updateColo
+FILE_LENGTH: 1149 chars
+OLD_STR_LENGTH: 28 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:46.145Z ---
+PATH: backend\src\modules\colors\colors.controller.ts
+OLD_STR (normalized):
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(+id);
+  }
+NEW_STR (normalized):
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(id);
+  }
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+import { ColorsService } from './colors.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@ApiTags('Colors')
+@Controller('colors')
+export class ColorsController {
+  constructor(
+    private readonly colorsService: ColorsService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all colors' })
+  @ApiResponse({ status: 200, description: 'Return all colors' })
+  async findAll() {
+    return this.colorsService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a color by ID' })
+  @ApiResponse({ status: 200, description: 'Return the color' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(+id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Cr
+FILE_LENGTH: 1886 chars
+OLD_STR_LENGTH: 90 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:46.181Z ---
+PATH: backend\src\modules\colors\colors.controller.ts
+OLD_STR (normalized):
+  async update(@Param('id') id: string, @Body() updateColorDto: UpdateColorDto) {
+    return this.colorsService.update(+id, updateColorDto);
+  }
+NEW_STR (normalized):
+  async update(@Param('id') id: string, @Body() updateColorDto: UpdateColorDto) {
+    return this.colorsService.update(id, updateColorDto);
+  }
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+import { ColorsService } from './colors.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@ApiTags('Colors')
+@Controller('colors')
+export class ColorsController {
+  constructor(
+    private readonly colorsService: ColorsService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all colors' })
+  @ApiResponse({ status: 200, description: 'Return all colors' })
+  async findAll() {
+    return this.colorsService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a color by ID' })
+  @ApiResponse({ status: 200, description: 'Return the color' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Cre
+FILE_LENGTH: 1885 chars
+OLD_STR_LENGTH: 144 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:46.218Z ---
+PATH: backend\src\modules\colors\colors.controller.ts
+OLD_STR (normalized):
+  async remove(@Param('id') id: string) {
+    return this.colorsService.remove(+id);
+  }
+NEW_STR (normalized):
+  async remove(@Param('id') id: string) {
+    return this.colorsService.remove(id);
+  }
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+import { ColorsService } from './colors.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
+
+@ApiTags('Colors')
+@Controller('colors')
+export class ColorsController {
+  constructor(
+    private readonly colorsService: ColorsService,
+  ) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all colors' })
+  @ApiResponse({ status: 200, description: 'Return all colors' })
+  async findAll() {
+    return this.colorsService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a color by ID' })
+  @ApiResponse({ status: 200, description: 'Return the color' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Cre
+FILE_LENGTH: 1884 chars
+OLD_STR_LENGTH: 88 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:06:50.798Z ---
+PATH: backend\src\modules\colors\dto\create-color.dto.ts
+OLD_STR (normalized):
+  @ApiProperty({ example: '#FF0000', description: 'Kode hex warna', required: false })
+  hexCode?: string;
+NEW_STR (normalized):
+  @ApiProperty({ example: '#FF0000', description: 'Kode hex warna' })
+  hexCode: string;
+FILE_CONTENT (first 1000 chars, normalized):
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateColorDto {
+  @ApiProperty({ example: 'Merah', description: 'Nama warna' })
+  name: string;
+
+  @ApiProperty({ example: '#FF0000', description: 'Kode hex warna', required: false })
+  hexCode?: string;
+
+  @ApiProperty({ example: 'Warna merah cerah', description: 'Deskripsi warna', required: false })
+  description?: string;
+}
+
+FILE_LENGTH: 391 chars
+OLD_STR_LENGTH: 106 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:22:39.911Z ---
+PATH: backend/src/modules/occasions/occasions.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class OccasionsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.occasion.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+NEW_STR (normalized):
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateOccasionDto } from './dto/create-occasion.dto';
+import { UpdateOccasionDto } from './dto/update-occasion.dto';
+
+@Injectable()
+export class OccasionsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.occasion.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    const occasion = await this.prisma.occasion.findUnique({
+      where: { id },
+    });
+
+    if (!occasion) {
+      throw new NotFoundException(`Occasion with ID ${id} not found`);
+    }
+
+    return occasion;
+  }
+
+  async create(createOccasionDto: CreateOccasionDto) {
+    return this.prisma.occasion.create({
+      data: createOccasionDto,
+    });
+  }
+
+  async update(id: string, updateOccasionDto: UpdateOccasionDto) {
+    await this.findOne(id);
+
+    return this.prisma.occasion.update({
+      where: { id },
+      data: updateOccasionDto,
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.occasion.delete({
+      where: { id },
+    });
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class OccasionsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.occasion.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+}
+
+FILE_LENGTH: 335 chars
+OLD_STR_LENGTH: 334 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-18T06:22:50.101Z ---
+PATH: backend/src/modules/occasions/occasions.controller.ts
+OLD_STR (normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { OccasionsService } from './occasions.service';
+
+@ApiTags('Occasions')
+@Controller('occasions')
+export class OccasionsController {
+  constructor(private readonly occasionsService: OccasionsService) {}
+
+  @Get()
+  async findAll() {
+    return this.occasionsService.findAll();
+  }
+}
+NEW_STR (normalized):
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { OccasionsService } from './occasions.service';
+import { CreateOccasionDto } from './dto/create-occasion.dto';
+import { UpdateOccasionDto } from './dto/update-occasion.dto';
+
+@ApiTags('Occasions')
+@Controller('occasions')
+export class OccasionsController {
+  constructor(private readonly occasionsService: OccasionsService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all occasions' })
+  @ApiResponse({ status: 200, description: 'Return all occasions' })
+  async findAll() {
+    return this.occasionsService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get an occasion by ID' })
+  @ApiResponse({ status: 200, description: 'Return the occasion' })
+  @ApiResponse({ status: 404, description: 'Occasion not found' })
+  async findOne(@Param('id') id: string) {
+    return this.occasionsService.findOne(id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new occasion' })
+  @ApiResponse({ status: 201, description: 'Occasion created successfully' })
+  async create(@Body() createOccasionDto: CreateOccasionDto) {
+    return this.occasionsService.create(createOccasionDto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update an occasion' })
+  @ApiResponse({ status: 200, description: 'Occasion updated successfully' })
+  @ApiResponse({ status: 404, description: 'Occasion not found' })
+  async update(@Param('id') id: string, @Body() updateOccasionDto: UpdateOccasionDto) {
+    return this.occasionsService.update(id, updateOccasionDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete an occasion' })
+  @ApiResponse({ status: 204, description: 'Occasion deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Occasion not found' })
+  async remove(@Param('id') id: string) {
+    return this.occasionsService.remove(id);
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { OccasionsService } from './occasions.service';
+
+@ApiTags('Occasions')
+@Controller('occasions')
+export class OccasionsController {
+  constructor(private readonly occasionsService: OccasionsService) {}
+
+  @Get()
+  async findAll() {
+    return this.occasionsService.findAll();
+  }
+}
+
+FILE_LENGTH: 382 chars
+OLD_STR_LENGTH: 381 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+

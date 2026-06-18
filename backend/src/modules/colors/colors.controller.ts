@@ -1,7 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { ColorsService } from './colors.service';
+import { CreateColorDto } from './dto/create-color.dto';
+import { UpdateColorDto } from './dto/update-color.dto';
 
 @ApiTags('Colors')
 @Controller('colors')
@@ -11,7 +13,41 @@ export class ColorsController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all colors' })
+  @ApiResponse({ status: 200, description: 'Return all colors' })
   async findAll() {
     return this.colorsService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a color by ID' })
+  @ApiResponse({ status: 200, description: 'Return the color' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async findOne(@Param('id') id: string) {
+    return this.colorsService.findOne(id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new color' })
+  @ApiResponse({ status: 201, description: 'Color created successfully' })
+  async create(@Body() createColorDto: CreateColorDto) {
+    return this.colorsService.create(createColorDto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a color' })
+  @ApiResponse({ status: 200, description: 'Color updated successfully' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async update(@Param('id') id: string, @Body() updateColorDto: UpdateColorDto) {
+    return this.colorsService.update(id, updateColorDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a color' })
+  @ApiResponse({ status: 204, description: 'Color deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Color not found' })
+  async remove(@Param('id') id: string) {
+    return this.colorsService.remove(id);
   }
 }

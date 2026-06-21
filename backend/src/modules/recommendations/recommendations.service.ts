@@ -1,6 +1,6 @@
 import {
-  Injectable,
-  BadRequestException,
+Injectable,
+BadRequestException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -13,79 +13,79 @@ import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class RecommendationsService {
-  // 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
-    constructor(
+// 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
+constructor(
     private readonly prisma: PrismaService,
     private readonly profilesService: ProfilesService,
     private readonly aiService: AiService,
-    ) {}
+) {}
 
-  private calculateColorMatch(
+private calculateColorMatch(
     outfit: any,
     favoriteColorId: string,
-  ): boolean {
+): boolean {
     return outfit.outfitItems.some(
-      (item) => item.fashionItem.colorId === favoriteColorId,
+    (item) => item.fashionItem.colorId === favoriteColorId,
     );
-  }
+}
 
-  private getFeedbackScore(
+private getFeedbackScore(
     feedback: string,
-  ): number {
+): number {
     switch (feedback) {
-      case 'LIKE':
+    case 'LIKE':
         return 15;
 
-      case 'DISLIKE':
+    case 'DISLIKE':
         return -20;
 
-      default:
+    default:
         return 0;
     }
-  }
+}
 
-  // 3. CORE PUBLIC METHODS
-  async generate(userId: string, dto: GenerateRecommendationDto) {
+// 3. CORE PUBLIC METHODS
+async generate(userId: string, dto: GenerateRecommendationDto) {
     const profile = await this.profilesService.findMyProfile(
-      userId,
+    userId,
     );
 
     // SOLUSI TS18047: Proteksi guard clause jika profile null
     if (!profile) {
-      throw new BadRequestException(
+    throw new BadRequestException(
         'Profile not found. Please complete your profile preferences first.',
-      );
+    );
     }
 
     const userFeedbacks = await this.prisma.recommendationFeedback.findMany({
-      where: {
+    where: {
         userId,
-      },
-      include: {
+    },
+    include: {
         recommendationItem: {
-          include: {
+        include: {
             outfit: true,
-          },
         },
-      },
+        },
+    },
     });
 
     let selectedOccasion: Awaited<
-      ReturnType<typeof this.prisma.occasion.findUnique>
+    ReturnType<typeof this.prisma.occasion.findUnique>
     > = null;
 
     if (dto.occasionId) {
-      selectedOccasion = await this.prisma.occasion.findUnique({
+    selectedOccasion = await this.prisma.occasion.findUnique({
         where: {
-          id: dto.occasionId,
+        id: dto.occasionId,
         },
-      });
+    });
 
-      if (!selectedOccasion) {
+    if (!selectedOccasion) {
         throw new BadRequestException(
-          'Occasion not found',
+        'Occasion not found',
         );
-      }
+    }
     }
 
     const outfits = await this.prisma.outfit.findMany({
@@ -96,166 +96,225 @@ export class RecommendationsService {
         occasionId: dto.occasionId,
         }),
     },
-      include: {
+    include: {
         style: true,
         occasion: true,
         bodyType: true,
         outfitItems: {
-          include: {
+        include: {
             fashionItem: true,
-          },
         },
-      },
+        },
+    },
     });
 
     if (!outfits.length) {
-      throw new BadRequestException(
+    throw new BadRequestException(
         'No outfits available',
-      );
+    );
     }
 
-    const profileAnalysis =
-    await this.aiService.analyzeProfile(
-        profile.height,
-        profile.weight,
+    const profileAnalysis = await this.aiService.analyzeProfile(
+    profile.height,
+    profile.weight,
     );
 
-    const bmi =
-    profileAnalysis.bmi;
-
-    const userBodyType =
-    profileAnalysis.bodyType;
+    const bmi = profileAnalysis.bmi;
+    const userBodyType = profileAnalysis.bodyType;
 
     const scoredOutfits = outfits.map((outfit) => {
-      let score = 0;
-      const reasons: string[] = [];
+    let score = 0;
+    const reasons: string[] = [];
 
-      if (outfit.gender === profile.gender) {
+    if (outfit.gender === profile.gender) {
         score += 20;
         reasons.push('Gender match');
-      }
+    }
 
-      if (outfit.styleId === profile.preferredStyleId) {
+    if (outfit.styleId === profile.preferredStyleId) {
         score += 25;
         reasons.push('Style match');
-      }
+    }
 
-      if (outfit.budgetRange === profile.budgetRange) {
+    if (outfit.budgetRange === profile.budgetRange) {
         score += 10;
         reasons.push('Budget match');
-      }
+    }
 
-      if (outfit.bodyType.name === userBodyType) {
+    if (outfit.bodyType.name === userBodyType) {
         score += 15;
         reasons.push('Body type match');
-      }
+    }
 
-      const colorMatch = this.calculateColorMatch(
+    const colorMatch = this.calculateColorMatch(
         outfit,
         profile.favoriteColorId,
-      );
+    );
 
-      if (colorMatch) {
+    if (colorMatch) {
         score += 10;
         reasons.push('Favorite color match');
-      }
+    }
 
-      // SOLUSI TS2451: Satukan filter dan perulangan feedback (duplikasi dibersihkan)
-      const outfitFeedbacks = userFeedbacks.filter(
+    const outfitFeedbacks = userFeedbacks.filter(
         (feedback) => feedback.recommendationItem.outfitId === outfit.id,
-      );
+    );
 
-      for (const feedback of outfitFeedbacks) {
+    for (const feedback of outfitFeedbacks) {
         const feedbackScore = this.getFeedbackScore(feedback.feedback);
         score += feedbackScore;
 
         if (feedback.feedback === 'LIKE') {
-          reasons.push('Positive feedback history');
+        reasons.push('Positive feedback history');
         } else if (feedback.feedback === 'DISLIKE') {
-          reasons.push('Negative feedback history');
+        reasons.push('Negative feedback history');
         }
-      }
+    }
 
-      return {
+    return {
         outfit,
         score,
         reasons,
-      };
+    };
     });
 
     scoredOutfits.sort((a, b) => {
-      if (b.score !== a.score) {
+    if (b.score !== a.score) {
         return b.score - a.score;
-      }
-      return b.outfit.outfitItems.length - a.outfit.outfitItems.length;
+    }
+    return b.outfit.outfitItems.length - a.outfit.outfitItems.length;
     });
 
     const topOutfits = scoredOutfits.slice(0, 3);
 
     const recommendation = await this.prisma.recommendation.create({
-      data: {
+    data: {
         userId,
         bmi,
         bodyType: userBodyType,
         items: {
-          create: topOutfits.map((item) => ({
+        create: topOutfits.map((item) => ({
             outfitId: item.outfit.id,
             score: item.score,
             reasons: item.reasons,
-          })),
+        })),
         },
-      },
-      include: {
+    },
+    include: {
         items: {
-          include: {
-            outfit: true,
-          },
+        include: {
+            outfit: {
+            include: {
+                outfitItems: {
+                include: {
+                    fashionItem: true,
+                },
+                },
+            },
+            },
         },
-      },
+        },
+    },
     });
 
+    // FIX: HANYA ADA SATU LOOP TUNGGAL UNTUK GENERATE AI DAN UPSERT DATABASE
+    for (const item of recommendation.items) {
+    const outfitItems = item.outfit.outfitItems.map(
+        (outfitItem) => outfitItem.fashionItem.name,
+    );
+
+    const fashionAdvice = await this.aiService.generateFashionAdvice({
+        gender: profile.gender,
+        age: profile.age,
+        height: profile.height,
+        weight: profile.weight,
+        bodyType: userBodyType,
+        skinTone: profile.skinTone,
+        preferredStyle: profile.preferredStyle?.name,
+        favoriteColor: profile.favoriteColor?.name,
+        outfitName: item.outfit.name,
+        outfitItems,
+    });
+
+    const promptResult = await this.aiService.generatePrompt({
+        gender: profile.gender,
+        height: profile.height,
+        weight: profile.weight,
+        bodyType: userBodyType,
+        skinTone: profile.skinTone,
+        preferredStyle: profile.preferredStyle?.name,
+        favoriteColor: profile.favoriteColor?.name,
+        outfitName: item.outfit.name,
+        outfitItems,
+    });
+
+    const imageResult = await this.aiService.generateImage(
+        promptResult.prompt,
+    );
+
+    await this.prisma.recommendationAiResult.upsert({
+        where: {
+        recommendationItemId: item.id,
+        },
+        update: {
+        advice: fashionAdvice.advice,
+        explanation: fashionAdvice.explanation,
+        imageUrl: imageResult.imageUrl,
+        finalPrompt: promptResult.prompt,
+        },
+        create: {
+        recommendationItemId: item.id,
+        advice: fashionAdvice.advice,
+        explanation: fashionAdvice.explanation,
+        imageUrl: imageResult.imageUrl,
+        finalPrompt: promptResult.prompt,
+        },
+    });
+    }
+
     return {
-      recommendation,
-      profileAnalysis: {
+    recommendation,
+    profileAnalysis: {
         bmi,
         bodyType: userBodyType,
-      },
-      selectedOccasion: selectedOccasion
+    },
+    selectedOccasion: selectedOccasion
         ? {
             id: selectedOccasion.id,
             name: selectedOccasion.name,
-          }
+        }
         : null,
-      recommendations: topOutfits.map((item) => ({
+    recommendations: topOutfits.map((item) => ({
         outfitId: item.outfit.id,
         outfitName: item.outfit.name,
         score: item.score,
         reasons: item.reasons,
-      })),
+    })),
     };
-  }
+}
 
-  async findMyRecommendations(userId: string) {
+async findMyRecommendations(userId: string) {
     return this.prisma.recommendation.findMany({
-      where: {
+    where: {
         userId,
-      },
-      include: {
+    },
+    include: {
         items: {
-          include: {
+        include: {
+            aiResult: true,
             outfit: {
-              include: {
+            include: {
                 style: true,
                 occasion: true,
                 bodyType: true,
-              },
             },
-          },
+            },
         },
-      },
-      orderBy: {
+        },
+    },
+    orderBy: {
         createdAt: 'desc',
-      },
+    },
     });
-  }
+}
 }

@@ -7,6 +7,215 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id              String                   @id @default(cuid())
+  name            String
+  email           String                   @unique
+  password        String?
+  avatar          String?
+  role            Role                     @default(USER)
+  provider        AuthProvider             @default(LOCAL)
+  isActive        Boolean                  @default(true)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  feedbacks       RecommendationFeedback[]
+  recommendations Recommendation[]
+  profile         UserProfile?
+
+  @@map("users")
+}
+
+model UserProfile {
+  id               String      @id @default(cuid())
+  userId           String      @unique
+  gender           Gender
+  age              Int
+  height           Float
+  weight           Float
+  skinTone         SkinTone
+  budgetRange      BudgetRange
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  favoriteColorId  String
+  preferredStyleId String
+  favoriteColor    Color       @relation(fields: [favoriteColorId], references: [id])
+  preferredStyle   Style       @relation(fields: [preferredStyleId], references: [id])
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Style {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  description  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  fashionItems FashionItem[]
+  outfits      Outfit[]
+  userProfiles UserProfile[]
+
+  @@map("styles")
+}
+
+model Color {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  hexCode      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  fashionItems FashionItem[]
+  userProfiles UserProfile[]
+
+  @@map("colors")
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  fashionItems FashionItem[]
+
+  @@map("categories")
+}
+
+model Occasion {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  outfits     Outfit[]
+
+  @@map("occasions")
+}
+
+model BodyType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  outfits     Outfit[]
+
+  @@map("body_types")
+}
+
+model FashionItem {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  gender      Gender
+  price       Decimal      @db.Decimal(12, 2)
+  imageUrl    String?
+  categoryId  String
+  styleId     String
+  colorId     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  isActive    Boolean      @default(true)
+  slug        String       @unique
+  category    Category     @relation(fields: [categoryId], references: [id])
+  color       Color        @relation(fields: [colorId], references: [id])
+  style       Style        @relation(fields: [styleId], references: [id])
+  outfitItems OutfitItem[]
+
+  @@map("fashion_items")
+}
+
+model Outfit {
+  id                  String               @id @default(cuid())
+  name                String
+  description         String?
+  gender              Gender
+  budgetRange         BudgetRange
+  imageUrl            String?
+  styleId             String
+  occasionId          String
+  bodyTypeId          String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  isActive            Boolean              @default(true)
+  slug                String               @unique
+  outfitItems         OutfitItem[]
+  bodyType            BodyType             @relation(fields: [bodyTypeId], references: [id])
+  occasion            Occasion             @relation(fields: [occasionId], references: [id])
+  style               Style                @relation(fields: [styleId], references: [id])
+  recommendationItems RecommendationItem[]
+
+  @@map("outfits")
+}
+
+model OutfitItem {
+  id            String         @id @default(cuid())
+  role          OutfitItemRole
+  outfitId      String
+  fashionItemId String
+  createdAt     DateTime       @default(now())
+  fashionItem   FashionItem    @relation(fields: [fashionItemId], references: [id])
+  outfit        Outfit         @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+
+  @@unique([outfitId, role])
+  @@map("outfit_items")
+}
+
+model Recommendation {
+  id          String               @id @default(cuid())
+  userId      String
+  createdAt   DateTime             @default(now())
+  bmi         Float?
+  bodyType    String?
+  generatedAt DateTime             @default(now())
+  items       RecommendationItem[]
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("recommendations")
+}
+
+model RecommendationItem {
+  id               String                   @id @default(cuid())
+  recommendationId String
+  outfitId         String
+  score            Int
+  createdAt        DateTime                 @default(now())
+  reasons          Json?
+  aiResult         RecommendationAiResult?
+  feedbacks        RecommendationFeedback[]
+  outfit           Outfit                   @relation(fields: [outfitId], references: [id])
+  recommendation   Recommendation           @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+
+  @@map("recommendation_items")
+}
+
+model RecommendationFeedback {
+  id                   String             @id @default(cuid())
+  userId               String
+  recommendationItemId String
+  feedback             FeedbackType
+  createdAt            DateTime           @default(now())
+  recommendationItem   RecommendationItem @relation(fields: [recommendationItemId], references: [id], onDelete: Cascade)
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recommendationItemId])
+  @@map("recommendation_feedbacks")
+}
+
+model RecommendationAiResult {
+  id                   String             @id @default(cuid())
+  recommendationItemId String             @unique
+  advice               String
+  explanation          String
+  imageUrl             String
+  modelPrompt          String?
+  outfitPrompt         String?
+  finalPrompt          String?
+  createdAt            DateTime           @default(now())
+  recommendationItem   RecommendationItem @relation(fields: [recommendationItemId], references: [id], onDelete: Cascade)
+
+  @@map("recommendation_ai_results")
+}
+
 enum Role {
   USER
   ADMIN
@@ -49,264 +258,4 @@ enum FeedbackType {
   LIKE
   NEUTRAL
   DISLIKE
-}
-
-model User {
-  id       String  @id @default(cuid())
-  name     String
-  email    String  @unique
-  password String?
-  avatar   String?
-
-  role     Role         @default(USER)
-  provider AuthProvider @default(LOCAL)
-
-  isActive Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  profile UserProfile?
-
-  recommendations Recommendation[]
-
-  feedbacks RecommendationFeedback[]
-
-  @@map("users")
-}
-
-model UserProfile {
-  id String @id @default(cuid())
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  gender Gender
-  age    Int
-
-  height Float
-  weight Float
-
-  skinTone SkinTone
-
-  favoriteColorId String
-  favoriteColor   Color  @relation(fields: [favoriteColorId], references: [id])
-
-  preferredStyleId String
-  preferredStyle   Style  @relation(fields: [preferredStyleId], references: [id])
-
-  budgetRange BudgetRange
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("user_profiles")
-}
-
-model Style {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  description String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userProfiles UserProfile[]
-
-  fashionItems FashionItem[]
-  outfits      Outfit[]
-
-  @@map("styles")
-}
-
-model Color {
-  id      String @id @default(cuid())
-  name    String @unique
-  hexCode String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userProfiles UserProfile[]
-
-  fashionItems FashionItem[]
-
-  @@map("colors")
-}
-
-model Category {
-  id   String @id @default(cuid())
-  name String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  fashionItems FashionItem[]
-
-  @@map("categories")
-}
-
-model Occasion {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  description String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  outfits Outfit[]
-
-  @@map("occasions")
-}
-
-model BodyType {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  description String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  outfits Outfit[]
-
-  @@map("body_types")
-}
-
-model FashionItem {
-  id String @id @default(cuid())
-
-  name        String
-  description String?
-  slug        String  @unique
-
-  gender Gender
-
-  price Decimal @db.Decimal(12, 2)
-
-  imageUrl String?
-
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  styleId String
-  style   Style  @relation(fields: [styleId], references: [id])
-
-  colorId String
-  color   Color  @relation(fields: [colorId], references: [id])
-
-  outfitItems OutfitItem[]
-
-  isActive Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("fashion_items")
-}
-
-model Outfit {
-  id String @id @default(cuid())
-
-  name        String
-  description String?
-  slug        String  @unique
-
-  gender Gender
-
-  budgetRange BudgetRange
-
-  imageUrl String?
-
-  styleId String
-  style   Style  @relation(fields: [styleId], references: [id])
-
-  occasionId String
-  occasion   Occasion @relation(fields: [occasionId], references: [id])
-
-  bodyTypeId String
-  bodyType   BodyType @relation(fields: [bodyTypeId], references: [id])
-
-  outfitItems OutfitItem[]
-
-  recommendationItems RecommendationItem[]
-
-  isActive Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("outfits")
-}
-
-model OutfitItem {
-  id String @id @default(cuid())
-
-  role OutfitItemRole
-
-  outfitId String
-  outfit   Outfit @relation(fields: [outfitId], references: [id], onDelete: Cascade)
-
-  fashionItemId String
-  fashionItem   FashionItem @relation(fields: [fashionItemId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@unique([outfitId, role])
-  @@map("outfit_items")
-}
-
-model Recommendation {
-  id String @id @default(cuid())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  bmi Float?
-
-  bodyType String?
-
-  generatedAt DateTime @default(now())
-
-  createdAt DateTime @default(now())
-
-  items RecommendationItem[]
-
-  @@map("recommendations")
-}
-
-model RecommendationItem {
-  id String @id @default(cuid())
-
-  recommendationId String
-  recommendation   Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
-
-  outfitId String
-  outfit   Outfit @relation(fields: [outfitId], references: [id])
-
-  score Int
-
-  reasons Json?
-
-  createdAt DateTime @default(now())
-
-  feedbacks RecommendationFeedback[]
-
-  @@map("recommendation_items")
-}
-
-model RecommendationFeedback {
-  id String @id @default(cuid())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  recommendationItemId String
-  recommendationItem   RecommendationItem @relation(fields: [recommendationItemId], references: [id], onDelete: Cascade)
-
-  feedback FeedbackType
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, recommendationItemId])
-  @@map("recommendation_feedbacks")
 }

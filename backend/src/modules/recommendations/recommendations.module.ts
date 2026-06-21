@@ -6,10 +6,13 @@ import { RecommendationsService } from './recommendations.service';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { AuthModule } from '../auth/auth.module';
 
+import { AiModule } from '../ai/ai.module';
+
 @Module({
   imports: [
     ProfilesModule,
     AuthModule,
+    AiModule,
   ],
 
   controllers: [

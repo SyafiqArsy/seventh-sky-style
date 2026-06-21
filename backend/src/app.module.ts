@@ -18,6 +18,7 @@ import { OutfitsModule } from './modules/outfits/outfits.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RecommendationFeedbacksModule } from './modules/recommendation-feedbacks/recommendation-feedbacks.module';
+import { AiModule } from './modules/ai/ai.module';
 
 
 @Module({
@@ -38,6 +39,7 @@ import { RecommendationFeedbacksModule } from './modules/recommendation-feedback
     OutfitsModule,
     RecommendationsModule,
     RecommendationFeedbacksModule,
+    AiModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),

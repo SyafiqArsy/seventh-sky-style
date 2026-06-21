@@ -9,45 +9,16 @@ import { ProfilesService } from '../profiles/profiles.service';
 
 import { GenerateRecommendationDto } from './dto/generate-recommendation.dto';
 
+import { AiService } from '../ai/ai.service';
+
 @Injectable()
 export class RecommendationsService {
   // 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
-  constructor(
+    constructor(
     private readonly prisma: PrismaService,
     private readonly profilesService: ProfilesService,
-  ) {}
-
-  // 2. PRIVATE METHODS
-  private calculateBMI(
-    height: number,
-    weight: number,
-  ): number {
-    const heightInMeter = height / 100;
-
-    return Number(
-      (weight / (heightInMeter * heightInMeter)).toFixed(2),
-    );
-  }
-
-  // TODO:
-  // Replace BMI mapping with BodyType entity lookup
-  private classifyBodyType(
-    bmi: number,
-  ): string {
-    if (bmi < 18.5) {
-      return 'Slim';
-    }
-
-    if (bmi < 25) {
-      return 'Athletic';
-    }
-
-    if (bmi < 30) {
-      return 'Regular';
-    }
-
-    return 'Heavy';
-  }
+    private readonly aiService: AiService,
+    ) {}
 
   private calculateColorMatch(
     outfit: any,
@@ -118,12 +89,13 @@ export class RecommendationsService {
     }
 
     const outfits = await this.prisma.outfit.findMany({
-      where: {
+    where: {
         isActive: true,
+        gender: profile.gender,
         ...(dto.occasionId && {
-          occasionId: dto.occasionId,
+        occasionId: dto.occasionId,
         }),
-      },
+    },
       include: {
         style: true,
         occasion: true,
@@ -142,12 +114,17 @@ export class RecommendationsService {
       );
     }
 
-    const bmi = this.calculateBMI(
-      profile.height,
-      profile.weight,
+    const profileAnalysis =
+    await this.aiService.analyzeProfile(
+        profile.height,
+        profile.weight,
     );
 
-    const userBodyType = this.classifyBodyType(bmi);
+    const bmi =
+    profileAnalysis.bmi;
+
+    const userBodyType =
+    profileAnalysis.bodyType;
 
     const scoredOutfits = outfits.map((outfit) => {
       let score = 0;

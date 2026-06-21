@@ -206,7 +206,7 @@ model RecommendationAiResult {
   recommendationItemId String             @unique
   advice               String
   explanation          String
-  imageUrl             String
+  imageUrl             String?
   modelPrompt          String?
   outfitPrompt         String?
   finalPrompt          String?

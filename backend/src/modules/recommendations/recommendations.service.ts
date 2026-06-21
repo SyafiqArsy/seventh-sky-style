@@ -218,10 +218,28 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
     });
 
     // FIX: HANYA ADA SATU LOOP TUNGGAL UNTUK GENERATE AI DAN UPSERT DATABASE
-    for (const item of recommendation.items) {
+    for (const [index, item] of recommendation.items.entries()) {
     const outfitItems = item.outfit.outfitItems.map(
         (outfitItem) => outfitItem.fashionItem.name,
     );
+
+    const modelPrompt = `
+    Gender: ${profile.gender}
+    Age: ${profile.age}
+    Height: ${profile.height}
+    Weight: ${profile.weight}
+    Body Type: ${userBodyType}
+    Skin Tone: ${profile.skinTone}
+    Preferred Style: ${profile.preferredStyle?.name}
+    Favorite Color: ${profile.favoriteColor?.name}
+    `;
+
+    const outfitPrompt = `
+    Outfit Name: ${item.outfit.name}
+
+    Items:
+    ${outfitItems.join(', ')}
+    `;
 
     const fashionAdvice = await this.aiService.generateFashionAdvice({
         gender: profile.gender,
@@ -248,9 +266,20 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
         outfitItems,
     });
 
-    const imageResult = await this.aiService.generateImage(
+    let imageUrl: string | null = null;
+
+    if (index === 0) {
+        if (!promptResult?.prompt) {
+        continue;
+        }
+
+    const imageResult =
+        await this.aiService.generateImage(
         promptResult.prompt,
-    );
+        );
+
+    imageUrl = imageResult.imageUrl;
+    }
 
     await this.prisma.recommendationAiResult.upsert({
         where: {
@@ -259,15 +288,31 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
         update: {
         advice: fashionAdvice.advice,
         explanation: fashionAdvice.explanation,
-        imageUrl: imageResult.imageUrl,
-        finalPrompt: promptResult.prompt,
+
+        imageUrl,
+
+        modelPrompt,
+        outfitPrompt,
+
+        finalPrompt:
+            promptResult.prompt,
         },
         create: {
         recommendationItemId: item.id,
-        advice: fashionAdvice.advice,
-        explanation: fashionAdvice.explanation,
-        imageUrl: imageResult.imageUrl,
-        finalPrompt: promptResult.prompt,
+
+        advice:
+            fashionAdvice.advice,
+
+        explanation:
+            fashionAdvice.explanation,
+
+        imageUrl,
+
+        modelPrompt,
+        outfitPrompt,
+
+        finalPrompt:
+            promptResult.prompt,
         },
     });
     }
@@ -294,27 +339,79 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
 }
 
 async findMyRecommendations(userId: string) {
-    return this.prisma.recommendation.findMany({
-    where: {
+  const recommendations =
+    await this.prisma.recommendation.findMany({
+      where: {
         userId,
-    },
-    include: {
+      },
+
+      include: {
         items: {
-        include: {
+          include: {
             aiResult: true,
+
             outfit: {
-            include: {
+              include: {
                 style: true,
                 occasion: true,
                 bodyType: true,
+              },
             },
-            },
+          },
         },
-        },
-    },
-    orderBy: {
+      },
+
+      orderBy: {
         createdAt: 'desc',
-    },
+      },
     });
+
+  return recommendations.map(
+    (recommendation) => ({
+      recommendationId:
+        recommendation.id,
+
+      generatedAt:
+        recommendation.generatedAt,
+
+      bmi:
+        recommendation.bmi,
+
+      bodyType:
+        recommendation.bodyType,
+
+      items:
+        recommendation.items.map(
+          (item) => ({
+            recommendationItemId:
+              item.id,
+
+            outfitId:
+              item.outfit.id,
+
+            outfitName:
+              item.outfit.name,
+
+            score:
+              item.score,
+
+            reasons:
+              item.reasons,
+
+            style:
+              item.outfit.style.name,
+
+            occasion:
+              item.outfit.occasion.name,
+
+            bodyType:
+              item.outfit.bodyType.name,
+
+            aiResult:
+              item.aiResult,
+          }),
+        ),
+    }),
+  );
 }
 }

@@ -222,17 +222,19 @@ export class FashionItemsService {
     ) {
     await this.findOne(id);
 
-    if (
-        updateFashionItemDto.categoryId &&
-        updateFashionItemDto.styleId &&
-        updateFashionItemDto.colorId
-    ) {
-        await this.validateRelations(
-        updateFashionItemDto.categoryId,
-        updateFashionItemDto.styleId,
-        updateFashionItemDto.colorId,
-        );
-    }
+    const existingItem =
+    await this.findOne(id);
+
+    await this.validateRelations(
+    updateFashionItemDto.categoryId ??
+        existingItem.categoryId,
+
+    updateFashionItemDto.styleId ??
+        existingItem.styleId,
+
+    updateFashionItemDto.colorId ??
+        existingItem.colorId,
+    );
 
     const data: any = {
         ...updateFashionItemDto,

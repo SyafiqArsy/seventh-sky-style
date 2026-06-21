@@ -122,8 +122,12 @@ export class OutfitsService {
           occasion: true,
           bodyType: true,
 
-          outfitItems: {
-            include: {
+            outfitItems: {
+              orderBy: {
+                createdAt: 'asc',
+              },
+
+              include: {
               fashionItem: {
                 include: {
                   category: true,
@@ -246,17 +250,19 @@ export class OutfitsService {
     ) {
     await this.findOne(id);
 
-    if (
-        updateOutfitDto.styleId &&
-        updateOutfitDto.occasionId &&
-        updateOutfitDto.bodyTypeId
-    ) {
-        await this.validateRelations(
-        updateOutfitDto.styleId,
-        updateOutfitDto.occasionId,
-        updateOutfitDto.bodyTypeId,
-        );
-    }
+  const existingOutfit =
+    await this.findOne(id);
+
+  await this.validateRelations(
+    updateOutfitDto.styleId ??
+      existingOutfit.styleId,
+
+    updateOutfitDto.occasionId ??
+      existingOutfit.occasionId,
+
+    updateOutfitDto.bodyTypeId ??
+      existingOutfit.bodyTypeId,
+  );
 
     const data: any = {
         ...updateOutfitDto,

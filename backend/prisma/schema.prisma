@@ -45,6 +45,12 @@ enum OutfitItemRole {
   ACCESSORY
 }
 
+enum FeedbackType {
+  LIKE
+  NEUTRAL
+  DISLIKE
+}
+
 model User {
   id       String  @id @default(cuid())
   name     String
@@ -63,6 +69,8 @@ model User {
   profile UserProfile?
 
   recommendations Recommendation[]
+
+  feedbacks RecommendationFeedback[]
 
   @@map("users")
 }
@@ -281,5 +289,24 @@ model RecommendationItem {
 
   createdAt DateTime @default(now())
 
+  feedbacks RecommendationFeedback[]
+
   @@map("recommendation_items")
+}
+
+model RecommendationFeedback {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recommendationItemId String
+  recommendationItem   RecommendationItem @relation(fields: [recommendationItemId], references: [id], onDelete: Cascade)
+
+  feedback FeedbackType
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, recommendationItemId])
+  @@map("recommendation_feedbacks")
 }

@@ -1,279 +1,284 @@
 import {
-Injectable,
-BadRequestException,
+  Injectable,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 
 import { ProfilesService } from '../profiles/profiles.service';
 
+import { GenerateRecommendationDto } from './dto/generate-recommendation.dto';
+
 @Injectable()
 export class RecommendationsService {
-// 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
-constructor(
+  // 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
+  constructor(
     private readonly prisma: PrismaService,
     private readonly profilesService: ProfilesService,
-) {}
+  ) {}
 
-// 2. PINDAHKAN PRIVATE METHODS KE LUAR CONSTRUCTOR
-private calculateBMI(
+  // 2. PRIVATE METHODS
+  private calculateBMI(
     height: number,
     weight: number,
-): number {
-    const heightInMeter =
-        height / 100;
+  ): number {
+    const heightInMeter = height / 100;
 
     return Number(
-        (
-        weight /
-        (heightInMeter * heightInMeter)
-        ).toFixed(2),
+      (weight / (heightInMeter * heightInMeter)).toFixed(2),
     );
-}
+  }
 
-private classifyBodyType(
+  // TODO:
+  // Replace BMI mapping with BodyType entity lookup
+  private classifyBodyType(
     bmi: number,
-): string {
+  ): string {
     if (bmi < 18.5) {
-        return 'Slim';
+      return 'Slim';
     }
 
     if (bmi < 25) {
-        return 'Athletic';
+      return 'Athletic';
     }
 
     if (bmi < 30) {
-        return 'Regular';
+      return 'Regular';
     }
 
     return 'Heavy';
-}
+  }
 
-private calculateColorMatch(
+  private calculateColorMatch(
     outfit: any,
     favoriteColorId: string,
-): boolean {
+  ): boolean {
     return outfit.outfitItems.some(
-        (item) =>
-        item.fashionItem.colorId ===
-        favoriteColorId,
+      (item) => item.fashionItem.colorId === favoriteColorId,
     );
-}
+  }
 
-// 3. CORE PUBLIC METHODS
-async generate(userId: string) {
-        const profile =
-        await this.profilesService.findMyProfile(
-            userId,
-        );
+  private getFeedbackScore(
+    feedback: string,
+  ): number {
+    switch (feedback) {
+      case 'LIKE':
+        return 15;
 
-        if (!profile) {
-        throw new BadRequestException(
-            'Profile not found',
-        );
-        }
+      case 'DISLIKE':
+        return -20;
 
-        const outfits =
-        await this.prisma.outfit.findMany({
-            where: {
-            isActive: true,
-            },
+      default:
+        return 0;
+    }
+  }
 
-            include: {
-            style: true,
-            occasion: true,
-            bodyType: true,
+  // 3. CORE PUBLIC METHODS
+  async generate(userId: string, dto: GenerateRecommendationDto) {
+    const profile = await this.profilesService.findMyProfile(
+      userId,
+    );
 
-            outfitItems: {
-                include: {
-                fashionItem: true,
-                },
-            },
-            },
-        });
-
-        if (!outfits.length) {
-        throw new BadRequestException(
-            'No outfits available',
-        );
-        }
-
-        const bmi =
-        this.calculateBMI(
-            profile.height,
-            profile.weight,
-        );
-
-        const userBodyType =
-        this.classifyBodyType(bmi);
-
-        const scoredOutfits =
-        outfits.map((outfit) => {
-            let score = 0;
-
-            const reasons: string[] = [];
-
-            if (
-            outfit.gender === profile.gender
-            ) {
-            score += 25;
-
-            reasons.push(
-                'Gender match',
-            );
-            }
-
-            if (
-            outfit.styleId ===
-            profile.preferredStyleId
-            ) {
-            score += 30;
-
-            reasons.push(
-                'Style match',
-            );
-            }
-
-            if (
-            outfit.budgetRange ===
-            profile.budgetRange
-            ) {
-            score += 15;
-
-            reasons.push(
-                'Budget match',
-            );
-            }
-
-            if (
-            outfit.bodyType.name ===
-            userBodyType
-            ) {
-            score += 20;
-
-            reasons.push(
-                'Body type match',
-            );
-            }
-
-            const colorMatch =
-            this.calculateColorMatch(
-                outfit,
-                profile.favoriteColorId,
-            );
-
-            if (colorMatch) {
-            score += 10;
-
-            reasons.push(
-                'Favorite color match',
-            );
-            }
-
-            return {
-            outfit,
-            score,
-            reasons,
-            };
-        });
-
-        scoredOutfits.sort(
-        (a, b) =>
-            b.score - a.score,
-        );
-
-        const topOutfits =
-        scoredOutfits.slice(0, 3);
-
-        const recommendationSummary =
-        {
-            bmi,
-            bodyType:
-            userBodyType,
-        };
-
-        const recommendation =
-        await this.prisma.recommendation.create({
-            data: {
-            userId,
-
-            bmi,
-
-            bodyType: userBodyType,
-
-            items: {
-                create: topOutfits.map(
-                (item) => ({
-                    outfitId: item.outfit.id,
-                    score: item.score,
-                    reasons: item.reasons,
-                }),
-                ),
-            },
-            },
-
-            include: {
-            items: {
-                include: {
-                outfit: true,
-                },
-            },
-            },
-        });
-
-        return {
-            recommendation,
-
-            profileAnalysis: {
-                bmi,
-                bodyType:
-                userBodyType,
-            },
-
-            recommendations:
-                topOutfits.map(
-                (item) => ({
-                    outfitId:
-                    item.outfit.id,
-
-                    outfitName:
-                    item.outfit.name,
-
-                    score:
-                    item.score,
-
-                    reasons:
-                    item.reasons,
-                }),
-                ),
-        };
+    // SOLUSI TS18047: Proteksi guard clause jika profile null
+    if (!profile) {
+      throw new BadRequestException(
+        'Profile not found. Please complete your profile preferences first.',
+      );
     }
 
-    async findMyRecommendations(
-    userId: string,
-    ) {
-    return this.prisma.recommendation.findMany({
-        where: {
+    const userFeedbacks = await this.prisma.recommendationFeedback.findMany({
+      where: {
         userId,
+      },
+      include: {
+        recommendationItem: {
+          include: {
+            outfit: true,
+          },
         },
+      },
+    });
 
-        include: {
+    let selectedOccasion: Awaited<
+      ReturnType<typeof this.prisma.occasion.findUnique>
+    > = null;
+
+    if (dto.occasionId) {
+      selectedOccasion = await this.prisma.occasion.findUnique({
+        where: {
+          id: dto.occasionId,
+        },
+      });
+
+      if (!selectedOccasion) {
+        throw new BadRequestException(
+          'Occasion not found',
+        );
+      }
+    }
+
+    const outfits = await this.prisma.outfit.findMany({
+      where: {
+        isActive: true,
+        ...(dto.occasionId && {
+          occasionId: dto.occasionId,
+        }),
+      },
+      include: {
+        style: true,
+        occasion: true,
+        bodyType: true,
+        outfitItems: {
+          include: {
+            fashionItem: true,
+          },
+        },
+      },
+    });
+
+    if (!outfits.length) {
+      throw new BadRequestException(
+        'No outfits available',
+      );
+    }
+
+    const bmi = this.calculateBMI(
+      profile.height,
+      profile.weight,
+    );
+
+    const userBodyType = this.classifyBodyType(bmi);
+
+    const scoredOutfits = outfits.map((outfit) => {
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (outfit.gender === profile.gender) {
+        score += 20;
+        reasons.push('Gender match');
+      }
+
+      if (outfit.styleId === profile.preferredStyleId) {
+        score += 25;
+        reasons.push('Style match');
+      }
+
+      if (outfit.budgetRange === profile.budgetRange) {
+        score += 10;
+        reasons.push('Budget match');
+      }
+
+      if (outfit.bodyType.name === userBodyType) {
+        score += 15;
+        reasons.push('Body type match');
+      }
+
+      const colorMatch = this.calculateColorMatch(
+        outfit,
+        profile.favoriteColorId,
+      );
+
+      if (colorMatch) {
+        score += 10;
+        reasons.push('Favorite color match');
+      }
+
+      // SOLUSI TS2451: Satukan filter dan perulangan feedback (duplikasi dibersihkan)
+      const outfitFeedbacks = userFeedbacks.filter(
+        (feedback) => feedback.recommendationItem.outfitId === outfit.id,
+      );
+
+      for (const feedback of outfitFeedbacks) {
+        const feedbackScore = this.getFeedbackScore(feedback.feedback);
+        score += feedbackScore;
+
+        if (feedback.feedback === 'LIKE') {
+          reasons.push('Positive feedback history');
+        } else if (feedback.feedback === 'DISLIKE') {
+          reasons.push('Negative feedback history');
+        }
+      }
+
+      return {
+        outfit,
+        score,
+        reasons,
+      };
+    });
+
+    scoredOutfits.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return b.outfit.outfitItems.length - a.outfit.outfitItems.length;
+    });
+
+    const topOutfits = scoredOutfits.slice(0, 3);
+
+    const recommendation = await this.prisma.recommendation.create({
+      data: {
+        userId,
+        bmi,
+        bodyType: userBodyType,
         items: {
-            include: {
+          create: topOutfits.map((item) => ({
+            outfitId: item.outfit.id,
+            score: item.score,
+            reasons: item.reasons,
+          })),
+        },
+      },
+      include: {
+        items: {
+          include: {
+            outfit: true,
+          },
+        },
+      },
+    });
+
+    return {
+      recommendation,
+      profileAnalysis: {
+        bmi,
+        bodyType: userBodyType,
+      },
+      selectedOccasion: selectedOccasion
+        ? {
+            id: selectedOccasion.id,
+            name: selectedOccasion.name,
+          }
+        : null,
+      recommendations: topOutfits.map((item) => ({
+        outfitId: item.outfit.id,
+        outfitName: item.outfit.name,
+        score: item.score,
+        reasons: item.reasons,
+      })),
+    };
+  }
+
+  async findMyRecommendations(userId: string) {
+    return this.prisma.recommendation.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        items: {
+          include: {
             outfit: {
-                include: {
+              include: {
                 style: true,
                 occasion: true,
                 bodyType: true,
-                },
+              },
             },
-            },
+          },
         },
-        },
-
-        orderBy: {
+      },
+      orderBy: {
         createdAt: 'desc',
-        },
+      },
     });
-    }
+  }
 }

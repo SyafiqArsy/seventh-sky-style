@@ -4,6 +4,7 @@ import {
   Req,
   UseGuards,
   Get,
+  Body,
 } from '@nestjs/common';
 
 import {
@@ -16,6 +17,8 @@ import { RecommendationsService } from './recommendations.service';
 
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
+import { GenerateRecommendationDto } from './dto/generate-recommendation.dto';
+
 @ApiTags('Recommendations')
 @Controller('recommendations')
 export class RecommendationsController {
@@ -27,15 +30,19 @@ export class RecommendationsController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @ApiOperation({
-        summary:
+    summary:
         'Generate outfit recommendations',
     })
     async generate(
-        @Req() req: any,
+    @Req() req: any,
+
+    @Body()
+    dto: GenerateRecommendationDto,
     ) {
-        return this.recommendationsService.generate(
+    return this.recommendationsService.generate(
         req.user.sub,
-        );
+        dto,
+    );
     }
 
     @Get('me')

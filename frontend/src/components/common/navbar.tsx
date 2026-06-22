@@ -14,6 +14,10 @@ export function Navbar() {
             Style On
           </Link>
 
+          <Link href="/recommendation">
+            History
+          </Link>
+
           <Link href="/login">
             Login
           </Link>

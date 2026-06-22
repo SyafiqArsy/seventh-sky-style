@@ -266,14 +266,33 @@ export class RecommendationsService {
 
       if (index === 0) {
         if (!promptResult?.prompt) {
-          continue;
+          console.log(
+            "Prompt generation failed",
+          );
+        } else {
+          try {
+            const imageResult =
+              await this.aiService.generateImage(
+                promptResult.prompt,
+              );
+
+            imageUrl =
+              imageResult?.imageUrl ??
+              null;
+
+            console.log(
+              "Image generated:",
+              imageUrl,
+            );
+          } catch (error) {
+            console.error(
+              "Image generation failed",
+              error,
+            );
+
+            imageUrl = null;
+          }
         }
-
-        const imageResult = await this.aiService.generateImage(
-          promptResult.prompt,
-        );
-
-        imageUrl = imageResult.imageUrl;
       }
 
       await this.prisma.recommendationAiResult.upsert({

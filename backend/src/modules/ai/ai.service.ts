@@ -51,18 +51,30 @@ export class AiService {
     return data;
   }
 
-  async generateImage(
-    prompt: string,
-  ) {
-    const { data } = await firstValueFrom(
-      this.http.post(
-        `${process.env.AI_SERVICE_URL}/api/v1/generate-image`,
-        {
-          prompt,
-        },
-      ),
-    );
+async generateImage(
+  prompt: string,
+) {
+  try {
+    const { data } =
+      await firstValueFrom(
+        this.http.post(
+          `${process.env.AI_SERVICE_URL}/api/v1/generate-image`,
+          {
+            prompt,
+          },
+        ),
+      );
 
     return data;
+  } catch (error) {
+    console.error(
+      "AI image service error",
+      error,
+    );
+
+    return {
+      imageUrl: null,
+    };
   }
+}
 }

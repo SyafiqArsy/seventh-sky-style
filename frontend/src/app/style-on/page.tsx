@@ -62,12 +62,22 @@ export default function StyleOnPage() {
       const recommendationId = result.recommendation.id;
 
       router.push(`/recommendation/${recommendationId}`);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to generate recommendation");
-    } finally {
-      setLoading(false);
-    }
+    } catch (error: any) {
+        console.error(error);
+
+        console.log(
+          "BACKEND RESPONSE:",
+          error?.response?.data,
+        );
+
+        alert(
+          JSON.stringify(
+            error?.response?.data,
+            null,
+            2,
+          ),
+        );
+      }
   }
 
   return (

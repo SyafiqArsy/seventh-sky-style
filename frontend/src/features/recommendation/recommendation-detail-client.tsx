@@ -48,17 +48,16 @@ export default function RecommendationDetailClient({
       <div className="mt-10 grid gap-10 md:grid-cols-2">
 
         <div>
-          {firstItem.aiResult?.imageUrl && (
-            <Image
-              src={
-                firstItem.aiResult.imageUrl
-              }
-              alt="AI Outfit"
-              width={600}
-              height={800}
-              className="rounded-2xl"
-            />
-          )}
+          <Image
+            src={
+              firstItem.aiResult?.imageUrl ||
+              "/fashion/fashion-1.jpg"
+            }
+            alt="AI Outfit"
+            width={600}
+            height={800}
+            className="rounded-2xl"
+          />
         </div>
 
         <div>

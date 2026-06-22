@@ -72,20 +72,16 @@ export default function RecommendationHistoryClient() {
                       }
                     </h2>
 
-                    <p className="mt-2 text-zinc-500">
-                      BMI:
-                      {" "}
-                      {
-                        recommendation.bmi
-                      }
+                    <p className="text-zinc-500">
+                    BMI:
+                    {" "}
+                    {recommendation.bmi ?? "-"}
                     </p>
 
                     <p className="text-zinc-500">
-                      Body Type:
-                      {" "}
-                      {
-                        recommendation.bodyType
-                      }
+                    Body Type:
+                    {" "}
+                    {recommendation.bodyType ?? "-"}
                     </p>
 
                     <p className="text-zinc-500">

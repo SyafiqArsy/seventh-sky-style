@@ -59,7 +59,7 @@ export class ProfilesController {
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @Patch()
+    @Patch('me')
     @ApiOperation({
     summary: 'Update profile',
     })

@@ -79,7 +79,26 @@ Do not add any other fields.
 
         except Exception as e:
 
+            print(
+                "========== GEMINI ERROR =========="
+            )
+
+            print(type(e))
+
             print(e)
+
+            if hasattr(e, "last_attempt"):
+                print(
+                    "LAST ATTEMPT:"
+                )
+
+                print(
+                    e.last_attempt.exception()
+                )
+
+            print(
+                "=================================="
+            )
 
             return {
                 "advice":

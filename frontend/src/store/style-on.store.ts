@@ -4,8 +4,14 @@ import { persist } from "zustand/middleware";
 interface StyleOnState {
   occasionId: string | null;
 
+  pendingGenerate: boolean;
+
   setOccasionId: (
     id: string,
+  ) => void;
+
+  setPendingGenerate: (
+    value: boolean,
   ) => void;
 
   clear: () => void;
@@ -17,6 +23,8 @@ export const useStyleOnStore =
       (set) => ({
         occasionId: null,
 
+        pendingGenerate: false,
+
         setOccasionId: (
           id,
         ) =>
@@ -24,9 +32,17 @@ export const useStyleOnStore =
             occasionId: id,
           }),
 
+        setPendingGenerate: (
+          value,
+        ) =>
+          set({
+            pendingGenerate: value,
+          }),
+
         clear: () =>
           set({
             occasionId: null,
+            pendingGenerate: false,
           }),
       }),
       {

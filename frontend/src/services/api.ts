@@ -5,10 +5,18 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("accessToken")
-      : null;
+let token: string | null = null;
+
+    if (typeof window !== "undefined") {
+    const storage =
+        localStorage.getItem("auth-storage");
+
+    if (storage) {
+        token =
+        JSON.parse(storage).state
+            ?.accessToken;
+    }
+    }
 
   if (token) {
     config.headers.Authorization =

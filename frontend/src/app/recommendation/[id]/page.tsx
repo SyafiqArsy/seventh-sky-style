@@ -1,20 +1,21 @@
+import RecommendationDetailClient
+from "@/features/recommendation/recommendation-detail-client";
+
 interface Props {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function RecommendationDetailPage(
-  props: Props,
+export default async function Page(
+  { params }: Props,
 ) {
-  const params =
-    await props.params;
+  const { id } =
+    await params;
 
   return (
-    <div>
-      Recommendation:
-      {" "}
-      {params.id}
-    </div>
+    <RecommendationDetailClient
+      id={id}
+    />
   );
 }

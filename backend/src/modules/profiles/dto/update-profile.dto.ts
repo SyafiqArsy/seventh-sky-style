@@ -1,7 +1,47 @@
-import { PartialType } from '@nestjs/swagger';
+import {
+  IsOptional,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
-import { CreateProfileDto } from './create-profile.dto';
+import {
+  Gender,
+  SkinTone,
+  BudgetRange,
+} from '@prisma/client';
 
-export class UpdateProfileDto extends PartialType(
-  CreateProfileDto,
-) {}
+export class UpdateProfileDto {
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
+
+  @IsOptional()
+  @IsInt()
+  age?: number;
+
+  @IsOptional()
+  @IsNumber()
+  height?: number;
+
+  @IsOptional()
+  @IsNumber()
+  weight?: number;
+
+  @IsOptional()
+  @IsEnum(SkinTone)
+  skinTone?: SkinTone;
+
+  @IsOptional()
+  @IsEnum(BudgetRange)
+  budgetRange?: BudgetRange;
+
+  @IsOptional()
+  @IsString()
+  favoriteColorId?: string;
+
+  @IsOptional()
+  @IsString()
+  preferredStyleId?: string;
+}

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -87,14 +88,25 @@ export class ProfilesService {
     }
 
     return this.prisma.userProfile.update({
-        where: {
+      where: {
         userId,
-        },
-        data: dto,
-        include: {
+      },
+
+      data: {
+        gender: dto.gender,
+        age: dto.age,
+        height: dto.height,
+        weight: dto.weight,
+        skinTone: dto.skinTone,
+        budgetRange: dto.budgetRange,
+        favoriteColorId: dto.favoriteColorId,
+        preferredStyleId: dto.preferredStyleId,
+      },
+
+      include: {
         favoriteColor: true,
         preferredStyle: true,
-        },
+      },
     });
     }
 }

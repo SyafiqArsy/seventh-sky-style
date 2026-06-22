@@ -1,229 +1,225 @@
 import {
-Injectable,
-BadRequestException,
+  Injectable,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
-
 import { ProfilesService } from '../profiles/profiles.service';
-
 import { GenerateRecommendationDto } from './dto/generate-recommendation.dto';
-
 import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class RecommendationsService {
-// 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
-constructor(
+  // 1. CONSTRUCTOR HANYA UNTUK INJEKSI SERVICE
+  constructor(
     private readonly prisma: PrismaService,
     private readonly profilesService: ProfilesService,
     private readonly aiService: AiService,
-) {}
+  ) {}
 
-private calculateColorMatch(
+  private calculateColorMatch(
     outfit: any,
     favoriteColorId: string,
-): boolean {
+  ): boolean {
     return outfit.outfitItems.some(
-    (item) => item.fashionItem.colorId === favoriteColorId,
+      (item) => item.fashionItem.colorId === favoriteColorId,
     );
-}
+  }
 
-private getFeedbackScore(
+  private getFeedbackScore(
     feedback: string,
-): number {
+  ): number {
     switch (feedback) {
-    case 'LIKE':
+      case 'LIKE':
         return 15;
 
-    case 'DISLIKE':
+      case 'DISLIKE':
         return -20;
 
-    default:
+      default:
         return 0;
     }
-}
+  }
 
-// 3. CORE PUBLIC METHODS
-async generate(userId: string, dto: GenerateRecommendationDto) {
-    const profile = await this.profilesService.findMyProfile(
-    userId,
-    );
+  // 3. CORE PUBLIC METHODS
+  async generate(userId: string, dto: GenerateRecommendationDto) {
+    const profile = await this.profilesService.findMyProfile(userId);
 
     // SOLUSI TS18047: Proteksi guard clause jika profile null
     if (!profile) {
-    throw new BadRequestException(
+      throw new BadRequestException(
         'Profile not found. Please complete your profile preferences first.',
-    );
+      );
     }
 
     const userFeedbacks = await this.prisma.recommendationFeedback.findMany({
-    where: {
+      where: {
         userId,
-    },
-    include: {
+      },
+      include: {
         recommendationItem: {
-        include: {
+          include: {
             outfit: true,
+          },
         },
-        },
-    },
+      },
     });
 
     let selectedOccasion: Awaited<
-    ReturnType<typeof this.prisma.occasion.findUnique>
+      ReturnType<typeof this.prisma.occasion.findUnique>
     > = null;
 
     if (dto.occasionId) {
-    selectedOccasion = await this.prisma.occasion.findUnique({
+      selectedOccasion = await this.prisma.occasion.findUnique({
         where: {
-        id: dto.occasionId,
+          id: dto.occasionId,
         },
-    });
+      });
 
-    if (!selectedOccasion) {
+      if (!selectedOccasion) {
         throw new BadRequestException(
-        'Occasion not found',
+          'Occasion not found',
         );
-    }
+      }
     }
 
     const outfits = await this.prisma.outfit.findMany({
-    where: {
+      where: {
         isActive: true,
         gender: profile.gender,
         ...(dto.occasionId && {
-        occasionId: dto.occasionId,
+          occasionId: dto.occasionId,
         }),
-    },
-    include: {
+      },
+      include: {
         style: true,
         occasion: true,
         bodyType: true,
         outfitItems: {
-        include: {
+          include: {
             fashionItem: true,
+          },
         },
-        },
-    },
+      },
     });
 
     if (!outfits.length) {
-    throw new BadRequestException(
+      throw new BadRequestException(
         'No outfits available',
-    );
+      );
     }
 
     const profileAnalysis = await this.aiService.analyzeProfile(
-    profile.height,
-    profile.weight,
+      profile.height,
+      profile.weight,
     );
 
     const bmi = profileAnalysis.bmi;
     const userBodyType = profileAnalysis.bodyType;
 
     const scoredOutfits = outfits.map((outfit) => {
-    let score = 0;
-    const reasons: string[] = [];
+      let score = 0;
+      const reasons: string[] = [];
 
-    if (outfit.gender === profile.gender) {
+      if (outfit.gender === profile.gender) {
         score += 20;
         reasons.push('Gender match');
-    }
+      }
 
-    if (outfit.styleId === profile.preferredStyleId) {
+      if (outfit.styleId === profile.preferredStyleId) {
         score += 25;
         reasons.push('Style match');
-    }
+      }
 
-    if (outfit.budgetRange === profile.budgetRange) {
+      if (outfit.budgetRange === profile.budgetRange) {
         score += 10;
         reasons.push('Budget match');
-    }
+      }
 
-    if (outfit.bodyType.name === userBodyType) {
+      if (outfit.bodyType.name === userBodyType) {
         score += 15;
         reasons.push('Body type match');
-    }
+      }
 
-    const colorMatch = this.calculateColorMatch(
+      const colorMatch = this.calculateColorMatch(
         outfit,
         profile.favoriteColorId,
-    );
+      );
 
-    if (colorMatch) {
+      if (colorMatch) {
         score += 10;
         reasons.push('Favorite color match');
-    }
+      }
 
-    const outfitFeedbacks = userFeedbacks.filter(
+      const outfitFeedbacks = userFeedbacks.filter(
         (feedback) => feedback.recommendationItem.outfitId === outfit.id,
-    );
+      );
 
-    for (const feedback of outfitFeedbacks) {
+      for (const feedback of outfitFeedbacks) {
         const feedbackScore = this.getFeedbackScore(feedback.feedback);
         score += feedbackScore;
 
         if (feedback.feedback === 'LIKE') {
-        reasons.push('Positive feedback history');
+          reasons.push('Positive feedback history');
         } else if (feedback.feedback === 'DISLIKE') {
-        reasons.push('Negative feedback history');
+          reasons.push('Negative feedback history');
         }
-    }
+      }
 
-    return {
+      return {
         outfit,
         score,
         reasons,
-    };
+      };
     });
 
     scoredOutfits.sort((a, b) => {
-    if (b.score !== a.score) {
+      if (b.score !== a.score) {
         return b.score - a.score;
-    }
-    return b.outfit.outfitItems.length - a.outfit.outfitItems.length;
+      }
+      return b.outfit.outfitItems.length - a.outfit.outfitItems.length;
     });
 
     const topOutfits = scoredOutfits.slice(0, 3);
 
     const recommendation = await this.prisma.recommendation.create({
-    data: {
+      data: {
         userId,
         bmi,
         bodyType: userBodyType,
         items: {
-        create: topOutfits.map((item) => ({
+          create: topOutfits.map((item) => ({
             outfitId: item.outfit.id,
             score: item.score,
             reasons: item.reasons,
-        })),
+          })),
         },
-    },
-    include: {
+      },
+      include: {
         items: {
-        include: {
+          include: {
             outfit: {
-            include: {
+              include: {
                 outfitItems: {
-                include: {
+                  include: {
                     fashionItem: true,
+                  },
                 },
-                },
+              },
             },
-            },
+          },
         },
-        },
-    },
+      },
     });
 
     // FIX: HANYA ADA SATU LOOP TUNGGAL UNTUK GENERATE AI DAN UPSERT DATABASE
     for (const [index, item] of recommendation.items.entries()) {
-    const outfitItems = item.outfit.outfitItems.map(
+      const outfitItems = item.outfit.outfitItems.map(
         (outfitItem) => outfitItem.fashionItem.name,
-    );
+      );
 
-    const modelPrompt = `
+      const modelPrompt = `
     Gender: ${profile.gender}
     Age: ${profile.age}
     Height: ${profile.height}
@@ -234,14 +230,14 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
     Favorite Color: ${profile.favoriteColor?.name}
     `;
 
-    const outfitPrompt = `
+      const outfitPrompt = `
     Outfit Name: ${item.outfit.name}
 
     Items:
     ${outfitItems.join(', ')}
     `;
 
-    const fashionAdvice = await this.aiService.generateFashionAdvice({
+      const fashionAdvice = await this.aiService.generateFashionAdvice({
         gender: profile.gender,
         age: profile.age,
         height: profile.height,
@@ -252,9 +248,9 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
         favoriteColor: profile.favoriteColor?.name,
         outfitName: item.outfit.name,
         outfitItems,
-    });
+      });
 
-    const promptResult = await this.aiService.generatePrompt({
+      const promptResult = await this.aiService.generatePrompt({
         gender: profile.gender,
         height: profile.height,
         weight: profile.weight,
@@ -264,92 +260,76 @@ async generate(userId: string, dto: GenerateRecommendationDto) {
         favoriteColor: profile.favoriteColor?.name,
         outfitName: item.outfit.name,
         outfitItems,
-    });
+      });
 
-    let imageUrl: string | null = null;
+      let imageUrl: string | null = null;
 
-    if (index === 0) {
+      if (index === 0) {
         if (!promptResult?.prompt) {
-        continue;
+          continue;
         }
 
-    const imageResult =
-        await this.aiService.generateImage(
-        promptResult.prompt,
+        const imageResult = await this.aiService.generateImage(
+          promptResult.prompt,
         );
 
-    imageUrl = imageResult.imageUrl;
-    }
+        imageUrl = imageResult.imageUrl;
+      }
 
-    await this.prisma.recommendationAiResult.upsert({
+      await this.prisma.recommendationAiResult.upsert({
         where: {
-        recommendationItemId: item.id,
+          recommendationItemId: item.id,
         },
         update: {
-        advice: fashionAdvice.advice,
-        explanation: fashionAdvice.explanation,
-
-        imageUrl,
-
-        modelPrompt,
-        outfitPrompt,
-
-        finalPrompt:
-            promptResult.prompt,
+          advice: fashionAdvice.advice,
+          explanation: fashionAdvice.explanation,
+          imageUrl,
+          modelPrompt,
+          outfitPrompt,
+          finalPrompt: promptResult.prompt,
         },
         create: {
-        recommendationItemId: item.id,
-
-        advice:
-            fashionAdvice.advice,
-
-        explanation:
-            fashionAdvice.explanation,
-
-        imageUrl,
-
-        modelPrompt,
-        outfitPrompt,
-
-        finalPrompt:
-            promptResult.prompt,
+          recommendationItemId: item.id,
+          advice: fashionAdvice.advice,
+          explanation: fashionAdvice.explanation,
+          imageUrl,
+          modelPrompt,
+          outfitPrompt,
+          finalPrompt: promptResult.prompt,
         },
-    });
+      });
     }
 
     return {
-    recommendation,
-    profileAnalysis: {
+      recommendation,
+      profileAnalysis: {
         bmi,
         bodyType: userBodyType,
-    },
-    selectedOccasion: selectedOccasion
+      },
+      selectedOccasion: selectedOccasion
         ? {
             id: selectedOccasion.id,
             name: selectedOccasion.name,
-        }
+          }
         : null,
-    recommendations: topOutfits.map((item) => ({
+      recommendations: topOutfits.map((item) => ({
         outfitId: item.outfit.id,
         outfitName: item.outfit.name,
         score: item.score,
         reasons: item.reasons,
-    })),
+      })),
     };
-}
+  }
 
-async findMyRecommendations(userId: string) {
-  const recommendations =
-    await this.prisma.recommendation.findMany({
+  async findMyRecommendations(userId: string) {
+    const recommendations = await this.prisma.recommendation.findMany({
       where: {
         userId,
       },
-
       include: {
         items: {
           include: {
             aiResult: true,
-
             outfit: {
               include: {
                 style: true,
@@ -360,58 +340,132 @@ async findMyRecommendations(userId: string) {
           },
         },
       },
-
       orderBy: {
         createdAt: 'desc',
       },
     });
 
-  return recommendations.map(
-    (recommendation) => ({
-      recommendationId:
-        recommendation.id,
+    return recommendations.map((recommendation) => ({
+      recommendationId: recommendation.id,
+      generatedAt: recommendation.generatedAt,
+      bmi: recommendation.bmi,
+      bodyType: recommendation.bodyType,
+      items: recommendation.items.map((item) => ({
+        recommendationItemId: item.id,
+        outfitId: item.outfit.id,
+        outfitName: item.outfit.name,
+        score: item.score,
+        reasons: item.reasons,
+        style: item.outfit.style.name,
+        occasion: item.outfit.occasion.name,
+        bodyType: item.outfit.bodyType.name,
+        aiResult: item.aiResult,
+      })),
+    }));
+  }
 
-      generatedAt:
-        recommendation.generatedAt,
+  async findOne(recommendationId: string, userId: string) {
+    const recommendation = await this.prisma.recommendation.findFirst({
+      where: {
+        id: recommendationId,
+        userId,
+      },
+      include: {
+        items: {
+          include: {
+            aiResult: true,
+            outfit: {
+              include: {
+                style: true,
+                occasion: true,
+                bodyType: true,
+                outfitItems: {
+                  include: {
+                    fashionItem: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
-      bmi:
-        recommendation.bmi,
+    if (!recommendation) {
+      throw new NotFoundException('Recommendation not found');
+    }
 
-      bodyType:
-        recommendation.bodyType,
+    return recommendation;
+  }
 
-      items:
-        recommendation.items.map(
-          (item) => ({
-            recommendationItemId:
-              item.id,
+    async findLatest(userId: string) {
+    const recommendation =
+        await this.prisma.recommendation.findFirst({
+        where: {
+            userId,
+        },
 
-            outfitId:
-              item.outfit.id,
+        orderBy: {
+            createdAt: 'desc',
+        },
 
-            outfitName:
-              item.outfit.name,
+        include: {
+            items: {
+            include: {
+                aiResult: true,
 
-            score:
-              item.score,
+                outfit: {
+                include: {
+                    style: true,
+                    occasion: true,
+                    bodyType: true,
+                },
+                },
+            },
+            },
+        },
+        });
 
-            reasons:
-              item.reasons,
+    return recommendation;
+    }
 
-            style:
-              item.outfit.style.name,
+    async findHistory(userId: string) {
+    const recommendations =
+        await this.prisma.recommendation.findMany({
+        where: {
+            userId,
+        },
 
-            occasion:
-              item.outfit.occasion.name,
+        orderBy: {
+            createdAt: 'desc',
+        },
 
-            bodyType:
-              item.outfit.bodyType.name,
+        select: {
+            id: true,
+            generatedAt: true,
+            bmi: true,
+            bodyType: true,
 
-            aiResult:
-              item.aiResult,
-          }),
-        ),
-    }),
-  );
-}
+            items: {
+            select: {
+                id: true,
+
+                outfit: {
+                select: {
+                    name: true,
+                },
+                },
+
+                aiResult: {
+                select: {
+                    imageUrl: true,
+                },
+                },
+            },
+            },
+        },
+        });
+
+    return recommendations;
+    }
 }

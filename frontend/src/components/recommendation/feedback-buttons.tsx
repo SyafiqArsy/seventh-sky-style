@@ -14,6 +14,9 @@ export function FeedbackButtons({
   const [loading, setLoading] =
     useState(false);
 
+  const [submitted, setSubmitted] =
+    useState(false);
+
   async function submitFeedback(
     feedback:
       | "LIKE"
@@ -28,7 +31,7 @@ export function FeedbackButtons({
         feedback,
       });
 
-      alert("Feedback saved");
+      setSubmitted(true);
     } catch (error) {
       console.error(error);
 
@@ -38,6 +41,30 @@ export function FeedbackButtons({
     } finally {
       setLoading(false);
     }
+  }
+
+    if (submitted) {
+    return (
+      <div
+        className="
+        mt-8
+        rounded-2xl
+        border
+        border-green-200
+        bg-green-50
+        p-4
+        "
+      >
+        <p className="font-medium">
+          ✅ Feedback submitted
+        </p>
+
+        <p className="text-sm text-zinc-600">
+          Your preference will be used to improve
+          future recommendations.
+        </p>
+      </div>
+    );
   }
 
   return (

@@ -22,6 +22,52 @@ export default function RecommendationHistoryClient() {
   const recommendations =
     query.data ?? [];
 
+    if (!recommendations.length) {
+      return (
+        <div className="container mx-auto max-w-5xl px-6 py-16">
+
+          <h1 className="text-4xl font-bold">
+            Recommendation History
+          </h1>
+
+          <div
+            className="
+            mt-10
+            rounded-3xl
+            border
+            p-12
+            text-center
+            "
+          >
+            <h2 className="text-2xl font-semibold">
+              No recommendations yet
+            </h2>
+
+            <p className="mt-3 text-zinc-500">
+              Generate your first AI outfit and let AI
+              create personalized recommendations for you.
+            </p>
+
+            <Link
+              href="/style-on"
+              className="
+              inline-block
+              mt-6
+              rounded-xl
+              bg-black
+              px-5
+              py-3
+              text-white
+              "
+            >
+              Style On
+            </Link>
+          </div>
+
+        </div>
+      );
+    }
+
   return (
     <div className="container mx-auto max-w-5xl px-6 py-16">
 
@@ -48,19 +94,16 @@ export default function RecommendationHistoryClient() {
                 <div className="flex gap-6">
 
                   <div>
-                    {firstItem?.aiResult
-                      ?.imageUrl && (
-                      <Image
-                        src={
-                          firstItem.aiResult
-                            .imageUrl
-                        }
-                        alt="Recommendation"
-                        width={160}
-                        height={200}
-                        className="rounded-xl"
-                      />
-                    )}
+                    <Image
+                      src={
+                        firstItem?.aiResult?.imageUrl ||
+                        "/fashion/fashion-1.jpg"
+                      }
+                      alt="Recommendation"
+                      width={160}
+                      height={200}
+                      className="rounded-xl object-cover w-[160px] h-[200px]"
+                    />
                   </div>
 
                   <div className="flex-1">

@@ -4,10 +4,11 @@ import {
   RecommendationHistory,
   GenerateRecommendationResponse,
   RecommendationDetail,
+  LatestRecommendation,
 } from "@/types/recommendation.types";
 
 export const recommendationService = {
-  async getLatest() {
+  async getLatest(): Promise<LatestRecommendation | null> {
     const { data } =
       await api.get(
         "/recommendations/me/latest",

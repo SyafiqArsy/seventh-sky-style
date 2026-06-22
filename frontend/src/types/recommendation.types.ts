@@ -45,3 +45,22 @@ export interface RecommendationItem {
     }[];
   };
 }
+
+export interface LatestRecommendation {
+  id: string;
+  generatedAt: string;
+  bmi: number;
+  bodyType: string;
+
+  items: {
+    id: string;
+
+    outfit: {
+      name: string;
+    };
+
+    aiResult: {
+      imageUrl: string | null;
+    } | null;
+  }[];
+}

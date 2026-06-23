@@ -15,6 +15,11 @@ export function LoginForm() {
       (state) => state.setToken,
     );
 
+  const setUser =
+    useAuthStore(
+      (state) => state.setUser,
+    );
+
   const [email, setEmail] =
     useState("");
 
@@ -41,6 +46,11 @@ export function LoginForm() {
       setToken(
         response.accessToken,
       );
+
+      const me =
+        await authService.me();
+
+      setUser(me);
 
       router.push("/style-on");
     } catch (error) {

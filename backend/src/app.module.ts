@@ -19,6 +19,7 @@ import { RecommendationsModule } from './modules/recommendations/recommendations
 import { JwtModule } from '@nestjs/jwt';
 import { RecommendationFeedbacksModule } from './modules/recommendation-feedbacks/recommendation-feedbacks.module';
 import { AiModule } from './modules/ai/ai.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 
 @Module({
@@ -40,6 +41,7 @@ import { AiModule } from './modules/ai/ai.module';
     RecommendationsModule,
     RecommendationFeedbacksModule,
     AiModule,
+    AdminModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),

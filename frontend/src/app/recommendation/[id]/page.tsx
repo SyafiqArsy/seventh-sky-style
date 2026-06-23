@@ -1,5 +1,6 @@
 import RecommendationDetailClient
 from "@/features/recommendation/recommendation-detail-client";
+import Navbar from "@/components/common/navbar";
 
 interface Props {
   params: Promise<{
@@ -14,8 +15,11 @@ export default async function Page(
     await params;
 
   return (
-    <RecommendationDetailClient
-      id={id}
-    />
+    <>
+      <Navbar />
+      <RecommendationDetailClient
+        id={id}
+      />
+    </>
   );
 }

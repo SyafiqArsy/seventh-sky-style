@@ -2248,3 +2248,4861 @@ OLD_STR_LENGTH: 340 chars
 HAS_CRLF_IN_FILE: no
 HAS_CRLF_IN_OLD: no
 
+
+--- 2026-06-23T06:19:10.912Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+}
+NEW_STR (normalized):
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          provider: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getProfiles(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: 'insensitive' } } },
+            { user: { email: { contains: search, mode: 'insensitive' } } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.userProfile.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          favoriteColor: true,
+          preferredStyle: true,
+        },
+      }),
+      this.prisma.userProfile.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getOutfits(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.outfit.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          style: true,
+          occasion: true,
+          bodyType: true,
+        },
+      }),
+      this.prisma.outfit.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getRecommendations(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: 'insensitive' } } },
+            { user: { email: { contains: search, mode: 'insensitive' } } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.recommendation.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          items: {
+            include: {
+              outfit: {
+                include: {
+                  style: true,
+                  occasion: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.recommendation.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+}
+FILE_LENGTH: 593 chars
+OLD_STR_LENGTH: 593 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:19:10.914Z ---
+PATH: backend/src/modules/admin/admin.controller.ts
+OLD_STR (normalized):
+import {
+  Controller,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
+
+import {
+  ApiBearerAuth,
+  ApiTags,
+} from '@nestjs/swagger';
+
+import { AdminService } from './admin.service';
+
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+
+@ApiTags('Admin')
+@Controller('admin')
+export class AdminController {
+  constructor(
+    private readonly adminService: AdminService,
+  ) {}
+
+  @Get('stats')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  getStats() {
+    return this.adminService.getStats();
+  }
+}
+NEW_STR (normalized):
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
+
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
+
+import { AdminService } from './admin.service';
+
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+
+@ApiTags('Admin')
+@Controller('admin')
+export class AdminController {
+  constructor(
+    private readonly adminService: AdminService,
+  ) {}
+
+  @Get('stats')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  getStats() {
+    return this.adminService.getStats();
+  }
+
+  @Get('users')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getUsers(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getUsers(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('profiles')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getProfiles(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getProfiles(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('outfits')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getOutfits(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getOutfits(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('recommendations')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getRecommendations(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getRecommendations(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import {
+  Controller,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
+
+import {
+  ApiBearerAuth,
+  ApiTags,
+} from '@nestjs/swagger';
+
+import { AdminService } from './admin.service';
+
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+
+@ApiTags('Admin')
+@Controller('admin')
+export class AdminController {
+  constructor(
+    private readonly adminService: AdminService,
+  ) {}
+
+  @Get('stats')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  getStats() {
+    return this.adminService.getStats();
+  }
+}
+FILE_LENGTH: 686 chars
+OLD_STR_LENGTH: 686 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:19:20.917Z ---
+PATH: frontend/src/services/admin.service.ts
+OLD_STR (normalized):
+import { api } from "./api";
+
+export const adminService = {
+  async getUsers() {
+    const { data } =
+      await api.get("/users");
+
+    return data;
+  },
+
+  async getStats() {
+    const { data } =
+      await api.get(
+        "/admin/stats",
+      );
+
+    return data;
+  },
+};
+NEW_STR (normalized):
+import { api } from "./api";
+
+export const adminService = {
+  async getUsers(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/users?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get("/admin/stats");
+    return data;
+  },
+
+  async getProfiles(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/profiles?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getOutfits(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/outfits?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getRecommendations(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/recommendations?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+};
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+export const adminService = {
+  async getUsers() {
+    const { data } =
+      await api.get("/users");
+
+    return data;
+  },
+
+  async getStats() {
+    const { data } =
+      await api.get(
+        "/admin/stats",
+      );
+
+    return data;
+  },
+}; 
+FILE_LENGTH: 279 chars
+OLD_STR_LENGTH: 278 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:20:04.986Z ---
+PATH: frontend/src/app/admin/page.tsx
+OLD_STR (normalized):
+"use client";
+
+import Link from "next/link";
+
+import {
+  useAdminStats,
+} from "@/features/admin/use-admin-stats";
+
+export default function AdminPage() {
+  const query =
+    useAdminStats();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const stats =
+    query.data;
+
+  return (
+    <div className="p-10">
+
+      <h1 className="text-4xl font-bold">
+        Admin Dashboard
+      </h1>
+
+      <div
+        className="
+        mt-8
+        grid
+        gap-6
+        md:grid-cols-2
+        lg:grid-cols-4
+        "
+      >
+
+        <div className="rounded-2xl border p-6">
+          <p className="text-zinc-500">
+            Users
+          </p>
+
+          <p className="mt-2 text-4xl font-bold">
+            {stats.users}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border p-6">
+          <p className="text-zinc-500">
+            Profiles
+          </p>
+
+          <p className="mt-2 text-4xl font-bold">
+            {stats.profiles}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border p-6">
+          <p className="text-zinc-500">
+            Outfits
+          </p>
+
+          <p className="mt-2 text-4xl font-bold">
+            {stats.outfits}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border p-6">
+          <p className="text-zinc-500">
+            Recommendations
+          </p>
+
+          <p className="mt-2 text-4xl font-bold">
+            {stats.recommendations}
+          </p>
+        </div>
+
+      </div>
+
+      <div className="mt-10 flex gap-4">
+
+        <Link
+          href="/admin/users"
+          className="
+          rounded-xl
+          border
+          px-4
+          py-2
+          "
+        >
+          Users
+        </Link>
+
+      </div>
+
+    </div>
+  );
+}
+NEW_STR (normalized):
+"use client";
+
+import Link from "next/link";
+
+import {
+  useAdminStats,
+} from "@/features/admin/use-admin-stats";
+
+export default function AdminPage() {
+  const query =
+    useAdminStats();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const stats =
+    query.data;
+
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+  ];
+
+  return (
+    <div className="p-10">
+
+      <h1 className="text-4xl font-bold">
+        Admin Dashboard
+      </h1>
+
+      <div
+        className="
+        mt-8
+        grid
+        gap-6
+        md:grid-cols-2
+        lg:grid-cols-4
+        "
+      >
+
+        {navItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className="block rounded-2xl border p-6 transition hover:shadow-lg"
+          >
+            <p className="text-zinc-500">
+              {item.label}
+            </p>
+
+            <p className="mt-2 text-4xl font-bold">
+              {item.count}
+            </p>
+          </Link>
+        ))}
+
+      </div>
+
+      <div className="mt-10 flex gap-4 flex-wrap">
+
+        {navItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className="
+            rounded-xl
+            border
+            px-4
+            py-2
+            hover:bg-zinc-50
+            transition
+            "
+          >
+            {item.label}
+          </Link>
+        ))}
+
+      </div>
+
+    </div>
+  );
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+
+import {
+  useAdminStats,
+} from "@/features/admin/use-admin-stats";
+
+export default function AdminPage() {
+  const query =
+    useAdminStats();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const stats =
+    query.data;
+
+  return (
+    <div className="p-10">
+
+      <h1 className="text-4xl font-bold">
+        Admin Dashboard
+      </h1>
+
+      <div
+        className="
+        mt-8
+        grid
+        gap-6
+        md:grid-cols-2
+        lg:grid-cols-4
+        "
+      >
+
+        <div className="rounded-2xl border p-6">
+          <p className="text-zinc-500">
+            Users
+          </p>
+
+          <p className="mt-2 text-4xl font-bold">
+            {stats.users}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border p-6">
+          <p className="text-zinc-500">
+            Profiles
+          </p>
+
+          <p className="mt-2 text-4xl font-bold">
+    
+FILE_LENGTH: 1816 chars
+OLD_STR_LENGTH: 1816 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:22:47.022Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../../prisma/prisma.service';
+NEW_STR (normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+FILE_LENGTH: 4328 chars
+OLD_STR_LENGTH: 106 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:22:55.440Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+NEW_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      t
+FILE_LENGTH: 4369 chars
+OLD_STR_LENGTH: 216 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:22:55.476Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: 'insensitive' } } },
+            { user: { email: { contains: search, mode: 'insensitive' } } },
+          ],
+        }
+      : {};
+NEW_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+            { user: { email: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+          ],
+        }
+      : {};
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 4399 chars
+OLD_STR_LENGTH: 236 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:22:55.477Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+NEW_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { description: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 4399 chars
+OLD_STR_LENGTH: 222 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:22:55.501Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: 'insensitive' } } },
+            { user: { email: { contains: search, mode: 'insensitive' } } },
+          ],
+        }
+      : {};
+NEW_STR (normalized):
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+            { user: { email: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+          ],
+        }
+      : {};
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 4429 chars
+OLD_STR_LENGTH: 236 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:23:05.459Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+  async getProfiles(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: 'insensitive' } } },
+            { user: { email: { contains: search, mode: 'insensitive' } } },
+          ],
+        }
+      : {};
+NEW_STR (normalized):
+  async getProfiles(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+            { user: { email: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+          ],
+        }
+      : {};
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 4429 chars
+OLD_STR_LENGTH: 334 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:23:05.501Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+  async getRecommendations(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: 'insensitive' } } },
+            { user: { email: { contains: search, mode: 'insensitive' } } },
+          ],
+        }
+      : {};
+NEW_STR (normalized):
+  async getRecommendations(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+            { user: { email: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+          ],
+        }
+      : {};
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 4459 chars
+OLD_STR_LENGTH: 341 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:32:12.226Z ---
+PATH: frontend/src/features/admin/admin-users-page.tsx
+OLD_STR (normalized):
+  const users =
+    query.data ?? [];
+NEW_STR (normalized):
+  const users =
+    query.data?.data ?? [];
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import {
+  useAdminUsers,
+} from "./use-admin-users";
+
+export default function AdminUsersPage() {
+  const query =
+    useAdminUsers();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const users =
+    query.data ?? [];
+
+  return (
+    <div className="p-10">
+
+      <h1 className="text-3xl font-bold">
+        Users
+      </h1>
+
+      <div className="mt-8 overflow-x-auto">
+
+        <table className="w-full border">
+
+          <thead>
+
+            <tr className="border-b">
+
+              <th className="p-3 text-left">
+                Name
+              </th>
+
+              <th className="p-3 text-left">
+                Email
+              </th>
+
+              <th className="p-3 text-left">
+                Role
+              </th>
+
+              <th className="p-3 text-left">
+                Provider
+              </th>
+
+              <th className="p-3 text-left">
+                Created
+              </th>
+
+ 
+FILE_LENGTH: 1910 chars
+OLD_STR_LENGTH: 37 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:35:38.355Z ---
+PATH: frontend/src/services/admin.service.ts
+OLD_STR (normalized):
+  async getRecommendations(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/recommendations?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+};
+NEW_STR (normalized):
+  async getRecommendations(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/recommendations?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getStyles(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/styles?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getColors(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/colors?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getCategories(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/categories?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getOccasions(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/occasions?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getBodyTypes(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/body-types?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getFashionItems(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/fashion-items?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+};
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+export const adminService = {
+  async getUsers(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/users?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get("/admin/stats");
+    return data;
+  },
+
+  async getProfiles(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/profiles?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getOutfits(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/outfits?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getRecommendations(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/recommendations?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+}; 
+FILE_LENGTH: 932 chars
+OLD_STR_LENGTH: 207 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:35:38.361Z ---
+PATH: frontend/src/features/admin/use-admin-stats.ts
+OLD_STR (normalized):
+export function useAdminStats() {
+  return useQuery({
+    queryKey: ["admin-stats"],
+
+    queryFn: () =>
+      adminService.getStats(),
+  });
+}
+NEW_STR (normalized):
+export function useAdminStats() {
+  return useQuery({
+    queryKey: ["admin-stats"],
+
+    queryFn: async () => {
+      const stats = await adminService.getStats();
+      return {
+        users: stats.users || 0,
+        profiles: stats.profiles || 0,
+        outfits: stats.outfits || 0,
+        recommendations: stats.recommendations || 0,
+        styles: stats.styles || 0,
+        colors: stats.colors || 0,
+        categories: stats.categories || 0,
+        occasions: stats.occasions || 0,
+        bodyTypes: stats.bodyTypes || 0,
+        fashionItems: stats.fashionItems || 0,
+      };
+    },
+  });
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+
+import { adminService } from "@/services/admin.service";
+
+export function useAdminStats() {
+  return useQuery({
+    queryKey: ["admin-stats"],
+
+    queryFn: () =>
+      adminService.getStats(),
+  });
+}
+FILE_LENGTH: 267 chars
+OLD_STR_LENGTH: 143 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:35:38.362Z ---
+PATH: frontend/src/app/admin/page.tsx
+OLD_STR (normalized):
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+  ];
+NEW_STR (normalized):
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+    { label: "Styles", href: "/admin/styles", count: stats.styles },
+    { label: "Colors", href: "/admin/colors", count: stats.colors },
+    { label: "Categories", href: "/admin/categories", count: stats.categories },
+    { label: "Occasions", href: "/admin/occasions", count: stats.occasions },
+    { label: "Body Types", href: "/admin/body-types", count: stats.bodyTypes },
+    { label: "Fashion Items", href: "/admin/fashion-items", count: stats.fashionItems },
+  ];
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+
+import {
+  useAdminStats,
+} from "@/features/admin/use-admin-stats";
+
+export default function AdminPage() {
+  const query =
+    useAdminStats();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const stats =
+    query.data;
+
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+  ];
+
+  return (
+    <div className="p-10">
+
+      <h1 className="text-4xl font-bold">
+        Admin Dashboard
+      </h1>
+
+      <div
+        className="
+        mt-8
+        grid
+        gap-6
+        md:grid-cols-2
+        lg:grid-cols-4
+        "
+      >
+
+        {navItems.map((item) => (
+          <Link
+            key={item.la
+FILE_LENGTH: 1779 chars
+OLD_STR_LENGTH: 334 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:35:38.388Z ---
+PATH: frontend/src/app/admin/page.tsx
+OLD_STR (normalized):
+      <div
+        className="
+        mt-8
+        grid
+        gap-6
+        md:grid-cols-2
+        lg:grid-cols-4
+        "
+      >
+NEW_STR (normalized):
+      <div
+        className="
+        mt-8
+        grid
+        gap-6
+        md:grid-cols-2
+        lg:grid-cols-3
+        xl:grid-cols-4
+        "
+      >
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+
+import {
+  useAdminStats,
+} from "@/features/admin/use-admin-stats";
+
+export default function AdminPage() {
+  const query =
+    useAdminStats();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const stats =
+    query.data;
+
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+    { label: "Styles", href: "/admin/styles", count: stats.styles },
+    { label: "Colors", href: "/admin/colors", count: stats.colors },
+    { label: "Categories", href: "/admin/categories", count: stats.categories },
+    { label: "Occasions", href: "/admin/occasions", count: stats.occasions },
+    { label: "Body Types", href: "/ad
+FILE_LENGTH: 2245 chars
+OLD_STR_LENGTH: 134 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:38:52.975Z ---
+PATH: backend/src/modules/admin/admin.controller.ts
+OLD_STR (normalized):
+  @Get('recommendations')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getRecommendations(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getRecommendations(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+}
+NEW_STR (normalized):
+  @Get('recommendations')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getRecommendations(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getRecommendations(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('styles')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getStyles(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getStyles(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('colors')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getColors(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getColors(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('categories')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getCategories(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getCategories(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('occasions')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getOccasions(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getOccasions(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('body-types')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getBodyTypes(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getBodyTypes(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+
+  @Get('fashion-items')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  getFashionItems(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getFashionItems(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+    );
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
+
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
+
+import { AdminService } from './admin.service';
+
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+
+import { Roles } from '../../common/decorators/roles.decorator';
+
+@ApiTags('Admin')
+@Controller('admin')
+export class AdminController {
+  constructor(
+    private readonly adminService: AdminService,
+  ) {}
+
+  @Get('stats')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  getStats() {
+    return this.adminService.getStats();
+  }
+
+  @Get('users')
+  @ApiBearerAuth()
+  @UseGuards(
+    JwtAuthGuard,
+    RolesGuard,
+  )
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  
+FILE_LENGTH: 2988 chars
+OLD_STR_LENGTH: 589 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:38:52.976Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+  async getRecommendations(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+            { user: { email: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.recommendation.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          items: {
+            include: {
+              outfit: {
+                include: {
+                  style: true,
+                  occasion: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.recommendation.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+}
+NEW_STR (normalized):
+  async getRecommendations(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { user: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+            { user: { email: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.recommendation.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          items: {
+            include: {
+              outfit: {
+                include: {
+                  style: true,
+                  occasion: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.recommendation.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getStyles(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { description: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.style.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.style.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getColors(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { hexCode: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.color.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.color.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getCategories(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { description: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.category.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.category.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getOccasions(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { description: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.occasion.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.occasion.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getBodyTypes(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { description: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.bodyType.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.bodyType.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getFashionItems(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { description: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.fashionItem.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          category: true,
+          style: true,
+          color: true,
+        },
+      }),
+      this.prisma.fashionItem.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 4489 chars
+OLD_STR_LENGTH: 1139 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:38:52.988Z ---
+PATH: backend/src/modules/admin/admin.service.ts
+OLD_STR (normalized):
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+NEW_STR (normalized):
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+      styles,
+      colors,
+      categories,
+      occasions,
+      bodyTypes,
+      fashionItems,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+      this.prisma.style.count(),
+      this.prisma.color.count(),
+      this.prisma.category.count(),
+      this.prisma.occasion.count(),
+      this.prisma.bodyType.count(),
+      this.prisma.fashionItem.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+      styles,
+      colors,
+      categories,
+      occasions,
+      bodyTypes,
+      fashionItems,
+    };
+  }
+FILE_CONTENT (first 1000 chars, normalized):
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async getStats() {
+    const [
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.userProfile.count(),
+      this.prisma.outfit.count(),
+      this.prisma.recommendation.count(),
+    ]);
+
+    return {
+      users,
+      profiles,
+      outfits,
+      recommendations,
+    };
+  }
+
+  async getUsers(page = 1, limit = 10, search?: string) {
+    const skip = (page - 1) * limit;
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          ],
+        }
+      : {};
+
+    const [data, total]
+FILE_LENGTH: 8839 chars
+OLD_STR_LENGTH: 374 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:47:55.343Z ---
+PATH: frontend/src/app/style-on/page.tsx
+OLD_STR (normalized):
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+import { masterService } from "@/services/master.service";
+import { recommendationService } from "@/services/recommendation.service";
+
+// Pastikan path store ini sesuai dengan struktur folder proyekmu
+import { useStyleOnStore } from "@/store/style-on.store"; 
+
+import { ProfilePreview } from "@/components/common/profile-preview";
+NEW_STR (normalized):
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+import { masterService } from "@/services/master.service";
+import { recommendationService } from "@/services/recommendation.service";
+
+// Pastikan path store ini sesuai dengan struktur folder proyekmu
+import { useStyleOnStore } from "@/store/style-on.store"; 
+
+import { ProfilePreview } from "@/components/common/profile-preview";
+import Navbar from "@/components/common/Navbar";
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+import { masterService } from "@/services/master.service";
+import { recommendationService } from "@/services/recommendation.service";
+
+// Pastikan path store ini sesuai dengan struktur folder proyekmu
+import { useStyleOnStore } from "@/store/style-on.store"; 
+
+import { ProfilePreview } from "@/components/common/profile-preview";
+
+export default function StyleOnPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+    const occasionId =
+    useStyleOnStore(
+        (state) => state.occasionId,
+    );
+
+    const setOccasionId =
+    useStyleOnStore(
+        (state) => state.setOccasionId,
+    );
+
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
+    queryFn: profileService.getMyProfile,
+  });
+
+  const occasionQuery = useQuery({
+    queryKey:
+FILE_LENGTH: 3363 chars
+OLD_STR_LENGTH: 536 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:47:55.355Z ---
+PATH: frontend/src/app/style-on/page.tsx
+OLD_STR (normalized):
+  return (
+    <div className="container mx-auto max-w-5xl px-6 py-20">
+      <h1 className="text-5xl font-bold">Style On</h1>
+NEW_STR (normalized):
+  return (
+    <>
+      <Navbar />
+      <div className="container mx-auto max-w-5xl px-6 py-20">
+        <h1 className="text-5xl font-bold">Style On</h1>
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+import { masterService } from "@/services/master.service";
+import { recommendationService } from "@/services/recommendation.service";
+
+// Pastikan path store ini sesuai dengan struktur folder proyekmu
+import { useStyleOnStore } from "@/store/style-on.store"; 
+
+import { ProfilePreview } from "@/components/common/profile-preview";
+import Navbar from "@/components/common/Navbar";
+
+export default function StyleOnPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+    const occasionId =
+    useStyleOnStore(
+        (state) => state.occasionId,
+    );
+
+    const setOccasionId =
+    useStyleOnStore(
+        (state) => state.setOccasionId,
+    );
+
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
+    queryFn: profileService.getMyProfile,
+  });
+
+FILE_LENGTH: 3412 chars
+OLD_STR_LENGTH: 126 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:47:55.376Z ---
+PATH: frontend/src/app/style-on/page.tsx
+OLD_STR (normalized):
+        </button>
+      </div>
+    </div>
+  );
+}
+NEW_STR (normalized):
+        </button>
+      </div>
+    </div>
+    </>
+  );
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+import { masterService } from "@/services/master.service";
+import { recommendationService } from "@/services/recommendation.service";
+
+// Pastikan path store ini sesuai dengan struktur folder proyekmu
+import { useStyleOnStore } from "@/store/style-on.store"; 
+
+import { ProfilePreview } from "@/components/common/profile-preview";
+import Navbar from "@/components/common/Navbar";
+
+export default function StyleOnPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+    const occasionId =
+    useStyleOnStore(
+        (state) => state.occasionId,
+    );
+
+    const setOccasionId =
+    useStyleOnStore(
+        (state) => state.setOccasionId,
+    );
+
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
+    queryFn: profileService.getMyProfile,
+  });
+
+FILE_LENGTH: 3440 chars
+OLD_STR_LENGTH: 48 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:47:55.377Z ---
+PATH: frontend/src/app/recommendation/page.tsx
+OLD_STR (normalized):
+import RecommendationHistoryClient
+from "@/features/recommendation/recommendation-history-client";
+
+export default function RecommendationPage() {
+  return (
+    <RecommendationHistoryClient />
+  );
+}
+NEW_STR (normalized):
+import RecommendationHistoryClient
+from "@/features/recommendation/recommendation-history-client";
+import Navbar from "@/components/common/Navbar";
+
+export default function RecommendationPage() {
+  return (
+    <>
+      <Navbar />
+      <RecommendationHistoryClient />
+    </>
+  );
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import RecommendationHistoryClient
+from "@/features/recommendation/recommendation-history-client";
+
+export default function RecommendationPage() {
+  return (
+    <RecommendationHistoryClient />
+  );
+}
+FILE_LENGTH: 200 chars
+OLD_STR_LENGTH: 200 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:47:55.379Z ---
+PATH: frontend/src/app/recommendation/[id]/page.tsx
+OLD_STR (normalized):
+import RecommendationDetailClient
+from "@/features/recommendation/recommendation-detail-client";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function Page(
+  { params }: Props,
+) {
+  const { id } =
+    await params;
+
+  return (
+    <RecommendationDetailClient
+      id={id}
+    />
+  );
+}
+NEW_STR (normalized):
+import RecommendationDetailClient
+from "@/features/recommendation/recommendation-detail-client";
+import Navbar from "@/components/common/Navbar";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function Page(
+  { params }: Props,
+) {
+  const { id } =
+    await params;
+
+  return (
+    <>
+      <Navbar />
+      <RecommendationDetailClient
+        id={id}
+      />
+    </>
+  );
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import RecommendationDetailClient
+from "@/features/recommendation/recommendation-detail-client";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function Page(
+  { params }: Props,
+) {
+  const { id } =
+    await params;
+
+  return (
+    <RecommendationDetailClient
+      id={id}
+    />
+  );
+}
+FILE_LENGTH: 328 chars
+OLD_STR_LENGTH: 328 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:49:44.449Z ---
+PATH: frontend/src/app/style-on/page.tsx
+OLD_STR (normalized):
+import Navbar from "@/components/common/Navbar";
+NEW_STR (normalized):
+import Navbar from "@/components/common/navbar";
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+import { masterService } from "@/services/master.service";
+import { recommendationService } from "@/services/recommendation.service";
+
+// Pastikan path store ini sesuai dengan struktur folder proyekmu
+import { useStyleOnStore } from "@/store/style-on.store"; 
+
+import { ProfilePreview } from "@/components/common/profile-preview";
+import Navbar from "@/components/common/Navbar";
+
+export default function StyleOnPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+    const occasionId =
+    useStyleOnStore(
+        (state) => state.occasionId,
+    );
+
+    const setOccasionId =
+    useStyleOnStore(
+        (state) => state.setOccasionId,
+    );
+
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
+    queryFn: profileService.getMyProfile,
+  });
+
+FILE_LENGTH: 3448 chars
+OLD_STR_LENGTH: 48 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:49:44.450Z ---
+PATH: frontend/src/app/recommendation/page.tsx
+OLD_STR (normalized):
+import Navbar from "@/components/common/Navbar";
+NEW_STR (normalized):
+import Navbar from "@/components/common/navbar";
+FILE_CONTENT (first 1000 chars, normalized):
+import RecommendationHistoryClient
+from "@/features/recommendation/recommendation-history-client";
+import Navbar from "@/components/common/Navbar";
+
+export default function RecommendationPage() {
+  return (
+    <>
+      <Navbar />
+      <RecommendationHistoryClient />
+    </>
+  );
+}
+FILE_LENGTH: 283 chars
+OLD_STR_LENGTH: 48 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:49:44.451Z ---
+PATH: frontend/src/app/recommendation/[id]/page.tsx
+OLD_STR (normalized):
+import Navbar from "@/components/common/Navbar";
+NEW_STR (normalized):
+import Navbar from "@/components/common/navbar";
+FILE_CONTENT (first 1000 chars, normalized):
+import RecommendationDetailClient
+from "@/features/recommendation/recommendation-detail-client";
+import Navbar from "@/components/common/Navbar";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function Page(
+  { params }: Props,
+) {
+  const { id } =
+    await params;
+
+  return (
+    <>
+      <Navbar />
+      <RecommendationDetailClient
+        id={id}
+      />
+    </>
+  );
+}
+FILE_LENGTH: 415 chars
+OLD_STR_LENGTH: 48 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:51:10.609Z ---
+PATH: frontend/src/app/admin/page.tsx
+OLD_STR (normalized):
+  const stats =
+    query.data;
+
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+    { label: "Styles", href: "/admin/styles", count: stats.styles },
+    { label: "Colors", href: "/admin/colors", count: stats.colors },
+    { label: "Categories", href: "/admin/categories", count: stats.categories },
+    { label: "Occasions", href: "/admin/occasions", count: stats.occasions },
+    { label: "Body Types", href: "/admin/body-types", count: stats.bodyTypes },
+    { label: "Fashion Items", href: "/admin/fashion-items", count: stats.fashionItems },
+  ];
+NEW_STR (normalized):
+  const stats =
+    query.data;
+
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats?.users ?? 0 },
+    { label: "Profiles", href: "/admin/profiles", count: stats?.profiles ?? 0 },
+    { label: "Outfits", href: "/admin/outfits", count: stats?.outfits ?? 0 },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats?.recommendations ?? 0 },
+    { label: "Styles", href: "/admin/styles", count: stats?.styles ?? 0 },
+    { label: "Colors", href: "/admin/colors", count: stats?.colors ?? 0 },
+    { label: "Categories", href: "/admin/categories", count: stats?.categories ?? 0 },
+    { label: "Occasions", href: "/admin/occasions", count: stats?.occasions ?? 0 },
+    { label: "Body Types", href: "/admin/body-types", count: stats?.bodyTypes ?? 0 },
+    { label: "Fashion Items", href: "/admin/fashion-items", count: stats?.fashionItems ?? 0 },
+  ];
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+
+import {
+  useAdminStats,
+} from "@/features/admin/use-admin-stats";
+
+export default function AdminPage() {
+  const query =
+    useAdminStats();
+
+  if (query.isLoading) {
+    return (
+      <div className="p-10">
+        Loading...
+      </div>
+    );
+  }
+
+  const stats =
+    query.data;
+
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats.users },
+    { label: "Profiles", href: "/admin/profiles", count: stats.profiles },
+    { label: "Outfits", href: "/admin/outfits", count: stats.outfits },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats.recommendations },
+    { label: "Styles", href: "/admin/styles", count: stats.styles },
+    { label: "Colors", href: "/admin/colors", count: stats.colors },
+    { label: "Categories", href: "/admin/categories", count: stats.categories },
+    { label: "Occasions", href: "/admin/occasions", count: stats.occasions },
+    { label: "Body Types", href: "/ad
+FILE_LENGTH: 2268 chars
+OLD_STR_LENGTH: 833 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:51:22.557Z ---
+PATH: frontend/src/app/page.tsx
+OLD_STR (normalized):
+import { Navbar } from "@/components/common/navbar";
+NEW_STR (normalized):
+import Navbar from "@/components/common/navbar";
+FILE_CONTENT (first 1000 chars, normalized):
+import { Navbar } from "@/components/common/navbar";
+import { HeroSection } from "@/features/home/hero-section";
+import { LatestRecommendationCard } from "@/features/home/latest-recommendation-card";
+import { GallerySection } from "@/components/common/gallery-section";
+import { HowItWorks } from "@/components/common/how-it-works";
+import { CTASection } from "@/components/common/cta-section";
+
+export default function HomePage() {
+  return (
+    <>
+      <Navbar />
+
+      <HeroSection />
+
+      <div className="container mx-auto max-w-5xl px-6 py-10">
+        <LatestRecommendationCard />
+      </div>
+
+      <GallerySection />
+
+      <HowItWorks />
+
+      <CTASection />
+    </>
+  );
+}
+FILE_LENGTH: 689 chars
+OLD_STR_LENGTH: 52 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:52:20.546Z ---
+PATH: frontend/src/services/recommendation.service.ts
+OLD_STR (normalized):
+import {
+  RecommendationHistory,
+  GenerateRecommendationResponse,
+  RecommendationDetail,
+  LatestRecommendation,
+} from "@/types/recommendation.types";
+NEW_STR (normalized):
+import {
+  RecommendationItem,
+  RecommendationDetail,
+  LatestRecommendation,
+} from "@/types/recommendation.types";
+
+interface GenerateRecommendationResponse {
+  id: string;
+  generatedAt: string;
+  items: RecommendationItem[];
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+import {
+  RecommendationHistory,
+  GenerateRecommendationResponse,
+  RecommendationDetail,
+  LatestRecommendation,
+} from "@/types/recommendation.types";
+
+export const recommendationService = {
+  async getLatest(): Promise<LatestRecommendation | null> {
+    const { data } =
+      await api.get(
+        "/recommendations/me/latest",
+      );
+
+    return data;
+  },
+
+  async getHistory(): Promise<
+    RecommendationHistory[]
+  > {
+    const { data } =
+      await api.get(
+        "/recommendations/me/history",
+      );
+
+    return data;
+  },
+
+    async getById(
+    id: string,
+    ): Promise<RecommendationDetail> {
+    const { data } =
+        await api.get(
+        `/recommendations/${id}`,
+        );
+
+    return data;
+    },
+
+  async generate(
+    occasionId?: string,
+  ): Promise<GenerateRecommendationResponse> {
+    const { data } =
+      await api.post(
+        "/recommendations/generate",
+        {
+          occasionId,
+        },
+      );
+
+    return 
+FILE_LENGTH: 1013 chars
+OLD_STR_LENGTH: 154 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:52:23.937Z ---
+PATH: frontend/src/services/recommendation.service.ts
+OLD_STR (normalized):
+  async getHistory(): Promise<
+    RecommendationHistory[]
+  > {
+NEW_STR (normalized):
+  async getHistory(): Promise<
+    RecommendationItem[]
+  > {
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+import {
+  RecommendationItem,
+  RecommendationDetail,
+  LatestRecommendation,
+} from "@/types/recommendation.types";
+
+interface GenerateRecommendationResponse {
+  id: string;
+  generatedAt: string;
+  items: RecommendationItem[];
+}
+
+export const recommendationService = {
+  async getLatest(): Promise<LatestRecommendation | null> {
+    const { data } =
+      await api.get(
+        "/recommendations/me/latest",
+      );
+
+    return data;
+  },
+
+  async getHistory(): Promise<
+    RecommendationHistory[]
+  > {
+    const { data } =
+      await api.get(
+        "/recommendations/me/history",
+      );
+
+    return data;
+  },
+
+    async getById(
+    id: string,
+    ): Promise<RecommendationDetail> {
+    const { data } =
+        await api.get(
+        `/recommendations/${id}`,
+        );
+
+    return data;
+    },
+
+  async generate(
+    occasionId?: string,
+  ): Promise<GenerateRecommendationResponse> {
+    const { data } =
+      await api.post(
+        "/recommendation
+FILE_LENGTH: 1090 chars
+OLD_STR_LENGTH: 64 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:52:40.819Z ---
+PATH: frontend/src/services/recommendation.service.ts
+OLD_STR (normalized):
+interface GenerateRecommendationResponse {
+  id: string;
+  generatedAt: string;
+  items: RecommendationItem[];
+}
+NEW_STR (normalized):
+interface GenerateRecommendationResponse {
+  recommendation: {
+    id: string;
+  };
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+import {
+  RecommendationItem,
+  RecommendationDetail,
+  LatestRecommendation,
+} from "@/types/recommendation.types";
+
+interface GenerateRecommendationResponse {
+  id: string;
+  generatedAt: string;
+  items: RecommendationItem[];
+}
+
+export const recommendationService = {
+  async getLatest(): Promise<LatestRecommendation | null> {
+    const { data } =
+      await api.get(
+        "/recommendations/me/latest",
+      );
+
+    return data;
+  },
+
+  async getHistory(): Promise<
+    RecommendationItem[]
+  > {
+    const { data } =
+      await api.get(
+        "/recommendations/me/history",
+      );
+
+    return data;
+  },
+
+    async getById(
+    id: string,
+    ): Promise<RecommendationDetail> {
+    const { data } =
+        await api.get(
+        `/recommendations/${id}`,
+        );
+
+    return data;
+    },
+
+  async generate(
+    occasionId?: string,
+  ): Promise<GenerateRecommendationResponse> {
+    const { data } =
+      await api.post(
+        "/recommendations/g
+FILE_LENGTH: 1087 chars
+OLD_STR_LENGTH: 112 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:53:26.664Z ---
+PATH: frontend/src/services/recommendation.service.ts
+OLD_STR (normalized):
+interface GenerateRecommendationResponse {
+  recommendation: {
+    id: string;
+  };
+}
+NEW_STR (normalized):
+export interface GenerateRecommendationResponse {
+  recommendation: {
+    id: string;
+  };
+}
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+import {
+  RecommendationItem,
+  RecommendationDetail,
+  LatestRecommendation,
+} from "@/types/recommendation.types";
+
+interface GenerateRecommendationResponse {
+  recommendation: {
+    id: string;
+  };
+}
+
+export const recommendationService = {
+  async getLatest(): Promise<LatestRecommendation | null> {
+    const { data } =
+      await api.get(
+        "/recommendations/me/latest",
+      );
+
+    return data;
+  },
+
+  async getHistory(): Promise<
+    RecommendationItem[]
+  > {
+    const { data } =
+      await api.get(
+        "/recommendations/me/history",
+      );
+
+    return data;
+  },
+
+    async getById(
+    id: string,
+    ): Promise<RecommendationDetail> {
+    const { data } =
+        await api.get(
+        `/recommendations/${id}`,
+        );
+
+    return data;
+    },
+
+  async generate(
+    occasionId?: string,
+  ): Promise<GenerateRecommendationResponse> {
+    const { data } =
+      await api.post(
+        "/recommendations/generate",
+        {
+       
+FILE_LENGTH: 1060 chars
+OLD_STR_LENGTH: 85 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:55:50.670Z ---
+PATH: frontend/src/features/profile/profile-client.tsx
+OLD_STR (normalized):
+"use client";
+
+import { useState, useEffect } from "react";
+
+import {useQuery,useMutation,useQueryClient,} from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+
+import { masterService } from "@/services/master.service";
+NEW_STR (normalized):
+"use client";
+
+import { useState, useEffect } from "react";
+
+import {useQuery,useMutation,useQueryClient,} from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+
+import { masterService } from "@/services/master.service";
+
+import Navbar from "@/components/common/navbar";
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState, useEffect } from "react";
+
+import {useQuery,useMutation,useQueryClient,} from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+
+import { masterService } from "@/services/master.service";
+
+export default function ProfileClient() {
+const queryClient = useQueryClient();
+
+const profileQuery = useQuery({
+  queryKey: ["profile"],
+  queryFn: profileService.getMyProfile,
+});
+
+const colorsQuery = useQuery({
+  queryKey: ["colors"],
+  queryFn: masterService.getColors,
+});
+
+const stylesQuery = useQuery({
+  queryKey: ["styles"],
+  queryFn: masterService.getStyles,
+});
+
+const updateProfileMutation =
+  useMutation({
+    mutationFn:
+      profileService.updateProfile,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["profile"],
+      });
+
+      alert(
+        "Profile updated successfully",
+      );
+    },
+
+        onError: (error: any) => {
+        console.error(error);
+
+        alert(
+            
+FILE_LENGTH: 7353 chars
+OLD_STR_LENGTH: 258 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:55:54.767Z ---
+PATH: frontend/src/features/profile/profile-client.tsx
+OLD_STR (normalized):
+  return (
+    <div className="container mx-auto max-w-3xl px-6 py-16">
+
+      <h1 className="text-4xl font-bold">
+        Profile
+      </h1>
+NEW_STR (normalized):
+  return (
+    <>
+      <Navbar />
+      <div className="container mx-auto max-w-3xl px-6 py-16">
+
+        <h1 className="text-4xl font-bold">
+          Profile
+        </h1>
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState, useEffect } from "react";
+
+import {useQuery,useMutation,useQueryClient,} from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+
+import { masterService } from "@/services/master.service";
+
+import Navbar from "@/components/common/navbar";
+
+export default function ProfileClient() {
+const queryClient = useQueryClient();
+
+const profileQuery = useQuery({
+  queryKey: ["profile"],
+  queryFn: profileService.getMyProfile,
+});
+
+const colorsQuery = useQuery({
+  queryKey: ["colors"],
+  queryFn: masterService.getColors,
+});
+
+const stylesQuery = useQuery({
+  queryKey: ["styles"],
+  queryFn: masterService.getStyles,
+});
+
+const updateProfileMutation =
+  useMutation({
+    mutationFn:
+      profileService.updateProfile,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["profile"],
+      });
+
+      alert(
+        "Profile updated successfully",
+      );
+    },
+
+        onError: (error: any) => {
+        
+FILE_LENGTH: 7403 chars
+OLD_STR_LENGTH: 142 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:55:57.752Z ---
+PATH: frontend/src/features/profile/profile-client.tsx
+OLD_STR (normalized):
+        </button>
+
+    </div>
+  );
+}
+NEW_STR (normalized):
+        </button>
+
+      </div>
+    </>
+  );
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useState, useEffect } from "react";
+
+import {useQuery,useMutation,useQueryClient,} from "@tanstack/react-query";
+
+import { profileService } from "@/services/profile.service";
+
+import { masterService } from "@/services/master.service";
+
+import Navbar from "@/components/common/navbar";
+
+export default function ProfileClient() {
+const queryClient = useQueryClient();
+
+const profileQuery = useQuery({
+  queryKey: ["profile"],
+  queryFn: profileService.getMyProfile,
+});
+
+const colorsQuery = useQuery({
+  queryKey: ["colors"],
+  queryFn: masterService.getColors,
+});
+
+const stylesQuery = useQuery({
+  queryKey: ["styles"],
+  queryFn: masterService.getStyles,
+});
+
+const updateProfileMutation =
+  useMutation({
+    mutationFn:
+      profileService.updateProfile,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["profile"],
+      });
+
+      alert(
+        "Profile updated successfully",
+      );
+    },
+
+        onError: (error: any) => {
+        
+FILE_LENGTH: 7435 chars
+OLD_STR_LENGTH: 36 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:57:54.722Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+NEW_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    // Redirect to home page
+    router.push("/");
+  };
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link
+              href="/"
+              className="text-xl font-bold text-gray-900 hover:text-gray-700 transition-colors"
+            >
+              Seventh Sky Style
+            </Link>
+          </div>
+          <div className="hidden md:flex items-center space-x-4">
+            {isAdmin && (
+             
+FILE_LENGTH: 2457 chars
+OLD_STR_LENGTH: 161 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:58:00.416Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+          <div className="hidden md:flex items-center space-x-4">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin Panel
+              </Link>
+            )}
+            {!isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin
+              </Link>
+            )}
+          </div>
+NEW_STR (normalized):
+          <div className="hidden md:flex items-center space-x-4">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin Panel
+              </Link>
+            )}
+            {!isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-red-50"
+            >
+              Logout
+            </button>
+          </div>
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    // Redirect to home page
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link
+              href="/"
+              className="text-xl font-bold 
+FILE_LENGTH: 2698 chars
+OLD_STR_LENGTH: 633 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T06:59:54.454Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    // Redirect to home page
+    router.push("/");
+  };
+NEW_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!(token && user));
+  }, []);
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    // Redirect to home page
+    router.push("/");
+  };
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    // Redirect to home page
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link
+              href="/"
+              className="text-xl font-bold 
+FILE_LENGTH: 2945 chars
+OLD_STR_LENGTH: 402 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:00:00.332Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+            {!isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-red-50"
+            >
+              Logout
+            </button>
+NEW_STR (normalized):
+            {!isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin
+              </Link>
+            )}
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="text-red-600 hover:text-red-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-red-50"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-blue-50"
+              >
+                Login
+              </Link>
+            )}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!(token && user));
+  }, []);
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    // Redirect to home page
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <na
+FILE_LENGTH: 3270 chars
+OLD_STR_LENGTH: 519 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:01:44.159Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!(token && user));
+  }, []);
+NEW_STR (normalized):
+  useEffect(() => {
+    // Check if user is logged in
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      setIsLoggedIn(!!(token && user));
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (when login happens in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token" || e.key === "user") {
+        checkAuth();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    // Custom event for same-tab login/logout
+    const handleAuthChange = () => checkAuth();
+    window.addEventListener("authChange", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authChange", handleAuthChange);
+    };
+  }, []);
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!(token && user));
+  }, []);
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    // Redirect to home page
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <na
+FILE_LENGTH: 3591 chars
+OLD_STR_LENGTH: 197 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:01:59.697Z ---
+PATH: frontend/src/store/auth.store.ts
+OLD_STR (normalized):
+        setToken: (token) =>
+          set({
+            accessToken: token,
+          }),
+
+        setUser: (user) =>
+          set({
+            user,
+          }),
+
+        logout: () =>
+          set({
+            accessToken: null,
+            user: null,
+          }),
+NEW_STR (normalized):
+        setToken: (token) => {
+          set({
+            accessToken: token,
+          });
+          window.dispatchEvent(new Event('authChange'));
+        },
+
+        setUser: (user) => {
+          set({
+            user,
+          });
+          window.dispatchEvent(new Event('authChange'));
+        },
+
+        logout: () => {
+          set({
+            accessToken: null,
+            user: null,
+          });
+          window.dispatchEvent(new Event('authChange'));
+        },
+FILE_CONTENT (first 1000 chars, normalized):
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface User {
+  sub: string;
+  email: string;
+  role: string;
+}
+
+interface AuthState {
+  accessToken: string | null;
+
+  user: User | null;
+
+  setToken: (
+    token: string,
+  ) => void;
+
+  setUser: (
+    user: User,
+  ) => void;
+
+  logout: () => void;
+}
+
+export const useAuthStore =
+  create<AuthState>()(
+    persist(
+      (set) => ({
+        accessToken: null,
+
+        user: null,
+
+        setToken: (token) =>
+          set({
+            accessToken: token,
+          }),
+
+        setUser: (user) =>
+          set({
+            user,
+          }),
+
+        logout: () =>
+          set({
+            accessToken: null,
+            user: null,
+          }),
+      }),
+      {
+        name: "auth-storage",
+      },
+    ),
+  );
+FILE_LENGTH: 813 chars
+OLD_STR_LENGTH: 274 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:02:05.228Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!(token && user));
+  }, []);
+NEW_STR (normalized):
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      setIsLoggedIn(!!(token && user));
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (when login happens in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token" || e.key === "user") {
+        checkAuth();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    // Custom event for same-tab login/logout
+    const handleAuthChange = () => checkAuth();
+    window.addEventListener("authChange", handleAuthChange);
+
+    return () =>
+FILE_LENGTH: 4241 chars
+OLD_STR_LENGTH: 486 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:02:16.206Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      setIsLoggedIn(!!(token && user));
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (when login happens in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token" || e.key === "user") {
+        checkAuth();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    // Custom event for same-tab login/logout
+    const handleAuthChange = () => checkAuth();
+    window.addEventListener("authChange", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("authChange", handleAuthChange);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    // Clear any authentication data
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    // Redirect to home page
+    router.push("/");
+  };
+NEW_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      setIsLoggedIn(!!(token && user));
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (when login happens in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token" || e.key === "user") {
+        checkAuth();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    // Custom event for same-tab login/logout
+    const handleAuthChange = () => checkAuth();
+    window.addEventListener("authChange", handleAuthChange);
+
+    return () =>
+FILE_LENGTH: 4241 chars
+OLD_STR_LENGTH: 1377 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:04:49.908Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+NEW_STR (normalized):
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+  const isAdmin = user?.role === "ADMIN";
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+  
+FILE_LENGTH: 3348 chars
+OLD_STR_LENGTH: 256 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:04:55.351Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+          <div className="hidden md:flex items-center space-x-4">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin Panel
+              </Link>
+            )}
+            {!isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin
+              </Link>
+            )}
+            {isLoggedIn ? (
+NEW_STR (normalized):
+          <div className="hidden md:flex items-center space-x-4">
+            {isLoggedIn && isAdmin && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Admin Panel
+              </Link>
+            )}
+            {isLoggedIn ? (
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+  const isAdmin = user?.role === "ADMIN";
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div classN
+FILE_LENGTH: 3442 chars
+OLD_STR_LENGTH: 644 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:06:26.995Z ---
+PATH: frontend/src/components/common/navbar.tsx
+OLD_STR (normalized):
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+NEW_STR (normalized):
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const isLoggedIn = !!accessToken;
+  const isAdmin = user?.role === "ADMIN";
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Style On", href: "/style-on" },
+    { label: "History", href: "/recommendation" },
+    { label: "Profile", href: "/profile" },
+  ];
+
+  const isAdmin = pathname?.startsWith("/admin");
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div classN
+FILE_LENGTH: 3183 chars
+OLD_STR_LENGTH: 251 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T07:06:39.578Z ---
+PATH: frontend/src/app/admin/layout.tsx
+OLD_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+NEW_STR (normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+import { useEffect } from "react";
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const isAdmin = user?.role === "ADMIN";
+  const isLoggedIn = !!accessToken;
+
+  useEffect(() => {
+    if (!isLoggedIn || !isAdmin) {
+      router.push("/");
+    }
+  }, [isLoggedIn, isAdmin, router]);
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+
+  const navItems = [
+    { label: "Dashboard", href: "/admin" },
+    { label: "Users", href: "/admin/users" },
+    { label: "Profiles", href: "/admin/profiles" },
+    { label: "Outfits", href: "/admin/outfits" },
+    { label: "Recommendations", href: "/admin/recommendations" },
+    { label: "Styles", href: "/admin/styles" },
+    { label: "Colors", href: "/admin/colors" },
+    { label: "Categories", href: "/admin/categories" },
+    { label: "Occasions", href: "/admin/occasions" },
+    { label: "Body Types", href: "/admin/body-types" },
+    { label: "Fashion Items", href: "/admin/fashion-items" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div classNa
+FILE_LENGTH: 2912 chars
+OLD_STR_LENGTH: 215 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T09:24:17.716Z ---
+PATH: frontend/src/services/admin.service.ts
+OLD_STR (normalized):
+  async deleteStyle(id: string) {
+    await api.delete(
+      `/styles/${id}`,
+    );
+  },
+};
+NEW_STR (normalized):
+  async deleteStyle(id: string) {
+    await api.delete(
+      `/styles/${id}`,
+    );
+  },
+
+  // ==================== COLORS ====================
+  async createColor(payload: {
+    name: string;
+    hexCode: string;
+  }) {
+    const { data } = await api.post(
+      "/colors",
+      payload,
+    );
+    return data;
+  },
+
+  async updateColor(
+    id: string,
+    payload: {
+      name?: string;
+      hexCode?: string;
+    },
+  ) {
+    const { data } = await api.patch(
+      `/colors/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async deleteColor(id: string) {
+    await api.delete(
+      `/colors/${id}`,
+    );
+  },
+
+  // ==================== CATEGORIES ====================
+  async createCategory(payload: {
+    name: string;
+    description?: string;
+  }) {
+    const { data } = await api.post(
+      "/categories",
+      payload,
+    );
+    return data;
+  },
+
+  async updateCategory(
+    id: string,
+    payload: {
+      name?: string;
+      description?: string;
+    },
+  ) {
+    const { data } = await api.patch(
+      `/categories/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async deleteCategory(id: string) {
+    await api.delete(
+      `/categories/${id}`,
+    );
+  },
+
+  // ==================== OCCASIONS ====================
+  async createOccasion(payload: {
+    name: string;
+    description?: string;
+  }) {
+    const { data } = await api.post(
+      "/occasions",
+      payload,
+    );
+    return data;
+  },
+
+  async updateOccasion(
+    id: string,
+    payload: {
+      name?: string;
+      description?: string;
+    },
+  ) {
+    const { data } = await api.patch(
+      `/occasions/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async deleteOccasion(id: string) {
+    await api.delete(
+      `/occasions/${id}`,
+    );
+  },
+
+  // ==================== BODY TYPES ====================
+  async createBodyType(payload: {
+    name: string;
+    description?: string;
+  }) {
+    const { data } = await api.post(
+      "/body-types",
+      payload,
+    );
+    return data;
+  },
+
+  async updateBodyType(
+    id: string,
+    payload: {
+      name?: string;
+      description?: string;
+    },
+  ) {
+    const { data } = await api.patch(
+      `/body-types/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async deleteBodyType(id: string) {
+    await api.delete(
+      `/body-types/${id}`,
+    );
+  },
+
+  // ==================== FASHION ITEMS ====================
+  async createFashionItem(payload: {
+    name: string;
+    description?: string;
+    gender: string;
+    price: number;
+    imageUrl?: string;
+    categoryId: string;
+    styleId: string;
+    colorId: string;
+    isActive?: boolean;
+  }) {
+    const { data } = await api.post(
+      "/fashion-items",
+      payload,
+    );
+    return data;
+  },
+
+  async updateFashionItem(
+    id: string,
+    payload: {
+      name?: string;
+      description?: string;
+      gender?: string;
+      price?: number;
+      imageUrl?: string;
+      categoryId?: string;
+      styleId?: string;
+      colorId?: string;
+      isActive?: boolean;
+    },
+  ) {
+    const { data } = await api.patch(
+      `/fashion-items/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async deleteFashionItem(id: string) {
+    await api.delete(
+      `/fashion-items/${id}`,
+    );
+  },
+
+  // ==================== OUTFITS ====================
+  async createOutfit(payload: {
+    name: string;
+    description?: string;
+    gender: string;
+    budgetRange: string;
+    imageUrl?: string;
+    styleId: string;
+    occasionId: string;
+    bodyTypeId: string;
+    isActive?: boolean;
+  }) {
+    const { data } = await api.post(
+      "/outfits",
+      payload,
+    );
+    return data;
+  },
+
+  async updateOutfit(
+    id: string,
+    payload: {
+      name?: string;
+      description?: string;
+      gender?: string;
+      budgetRange?: string;
+      imageUrl?: string;
+      styleId?: string;
+      occasionId?: string;
+      bodyTypeId?: string;
+      isActive?: boolean;
+    },
+  ) {
+    const { data } = await api.patch(
+      `/outfits/${id}`,
+      payload,
+    );
+    return data;
+  },
+
+  async deleteOutfit(id: string) {
+    await api.delete(
+      `/outfits/${id}`,
+    );
+  },
+};
+FILE_CONTENT (first 1000 chars, normalized):
+import { api } from "./api";
+
+export const adminService = {
+  async getUsers(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/users?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get("/admin/stats");
+    return data;
+  },
+
+  async getProfiles(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/profiles?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getOutfits(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/outfits?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getRecommendations(page = 1, limit = 10, search = "") {
+    const { data } = await api.get(
+      `/admin/recommendations?page=${page}&limit=${limit}&search=${search}`
+    );
+    return data;
+  },
+
+  async getStyles(page = 1, limit = 10, search = "") {
+    const { dat
+FILE_LENGTH: 2589 chars
+OLD_STR_LENGTH: 93 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T09:28:28.692Z ---
+PATH: frontend/src/features/admin/use-admin-users.ts
+OLD_STR (normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+
+import { adminService } from "@/services/admin.service";
+
+export function useAdminUsers() {
+  return useQuery({
+    queryKey: ["admin-users"],
+
+    queryFn: () =>
+      adminService.getUsers(),
+  });
+}
+NEW_STR (normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+
+import { adminService } from "@/services/admin.service";
+
+export function useAdminUsers(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-users", page, limit, search],
+    queryFn: () => adminService.getUsers(page, limit, search),
+  });
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+
+import { adminService } from "@/services/admin.service";
+
+export function useAdminUsers() {
+  return useQuery({
+    queryKey: ["admin-users"],
+
+    queryFn: () =>
+      adminService.getUsers(),
+  });
+}
+FILE_LENGTH: 267 chars
+OLD_STR_LENGTH: 267 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T09:28:28.693Z ---
+PATH: frontend/src/features/admin/use-admin-profiles.ts
+OLD_STR (normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+
+export function useAdminProfiles(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-profiles", page, limit, search],
+    queryFn: () => adminService.getProfiles(page, limit, search),
+  });
+}
+NEW_STR (normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+
+export function useAdminProfiles(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-profiles", page, limit, search],
+    queryFn: () => adminService.getProfiles(page, limit, search),
+  });
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+
+export function useAdminProfiles(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-profiles", page, limit, search],
+    queryFn: () => adminService.getProfiles(page, limit, search),
+  });
+}
+
+FILE_LENGTH: 342 chars
+OLD_STR_LENGTH: 341 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T09:28:28.696Z ---
+PATH: frontend/src/features/admin/use-admin-recommendations.ts
+OLD_STR (normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+
+export function useAdminRecommendations(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-recommendations", page, limit, search],
+    queryFn: () => adminService.getRecommendations(page, limit, search),
+  });
+}
+NEW_STR (normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+
+export function useAdminRecommendations(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-recommendations", page, limit, search],
+    queryFn: () => adminService.getRecommendations(page, limit, search),
+  });
+}
+FILE_CONTENT (first 1000 chars, normalized):
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/services/admin.service";
+
+export function useAdminRecommendations(page = 1, limit = 10, search = "") {
+  return useQuery({
+    queryKey: ["admin-recommendations", page, limit, search],
+    queryFn: () => adminService.getRecommendations(page, limit, search),
+  });
+}
+
+FILE_LENGTH: 363 chars
+OLD_STR_LENGTH: 362 chars
+HAS_CRLF_IN_FILE: no
+HAS_CRLF_IN_OLD: no
+
+
+--- 2026-06-23T09:35:35.110Z ---
+PATH: backend/src/main.ts
+OLD_STR (normalized):
+  app.enableCors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  });
+NEW_STR (normalized):
+  app.enableCors({
+    origin: ["http://localhost:3000", "http://localhost:5173"],
+    credentials: true,
+  });
+FILE_CONTENT (first 1000 chars, normalized):
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  });
+
+  app.setGlobalPrefix('api');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  const config = new DocumentBuilder()
+    .setTitle('Seventh Sky Style API')
+    .setDescription('AI-Powered Personal Fashion Stylist API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('docs', app, document);
+
+  await app.listen(process.env.PORT ?? 3001);
+}
+
+bootstrap();
+FILE_LENGTH: 914 chars
+OLD_STR_LENGTH: 84 chars
+HAS_CRLF_IN_FILE: yes
+HAS_CRLF_IN_OLD: no
+

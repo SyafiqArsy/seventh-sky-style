@@ -21,6 +21,19 @@ export default function AdminPage() {
   const stats =
     query.data;
 
+  const navItems = [
+    { label: "Users", href: "/admin/users", count: stats?.users ?? 0 },
+    { label: "Profiles", href: "/admin/profiles", count: stats?.profiles ?? 0 },
+    { label: "Outfits", href: "/admin/outfits", count: stats?.outfits ?? 0 },
+    { label: "Recommendations", href: "/admin/recommendations", count: stats?.recommendations ?? 0 },
+    { label: "Styles", href: "/admin/styles", count: stats?.styles ?? 0 },
+    { label: "Colors", href: "/admin/colors", count: stats?.colors ?? 0 },
+    { label: "Categories", href: "/admin/categories", count: stats?.categories ?? 0 },
+    { label: "Occasions", href: "/admin/occasions", count: stats?.occasions ?? 0 },
+    { label: "Body Types", href: "/admin/body-types", count: stats?.bodyTypes ?? 0 },
+    { label: "Fashion Items", href: "/admin/fashion-items", count: stats?.fashionItems ?? 0 },
+  ];
+
   return (
     <div className="p-10">
 
@@ -34,65 +47,47 @@ export default function AdminPage() {
         grid
         gap-6
         md:grid-cols-2
-        lg:grid-cols-4
+        lg:grid-cols-3
+        xl:grid-cols-4
         "
       >
 
-        <div className="rounded-2xl border p-6">
-          <p className="text-zinc-500">
-            Users
-          </p>
+        {navItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className="block rounded-2xl border p-6 transition hover:shadow-lg"
+          >
+            <p className="text-zinc-500">
+              {item.label}
+            </p>
 
-          <p className="mt-2 text-4xl font-bold">
-            {stats.users}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border p-6">
-          <p className="text-zinc-500">
-            Profiles
-          </p>
-
-          <p className="mt-2 text-4xl font-bold">
-            {stats.profiles}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border p-6">
-          <p className="text-zinc-500">
-            Outfits
-          </p>
-
-          <p className="mt-2 text-4xl font-bold">
-            {stats.outfits}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border p-6">
-          <p className="text-zinc-500">
-            Recommendations
-          </p>
-
-          <p className="mt-2 text-4xl font-bold">
-            {stats.recommendations}
-          </p>
-        </div>
+            <p className="mt-2 text-4xl font-bold">
+              {item.count}
+            </p>
+          </Link>
+        ))}
 
       </div>
 
-      <div className="mt-10 flex gap-4">
+      <div className="mt-10 flex gap-4 flex-wrap">
 
-        <Link
-          href="/admin/users"
-          className="
-          rounded-xl
-          border
-          px-4
-          py-2
-          "
-        >
-          Users
-        </Link>
+        {navItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className="
+            rounded-xl
+            border
+            px-4
+            py-2
+            hover:bg-zinc-50
+            transition
+            "
+          >
+            {item.label}
+          </Link>
+        ))}
 
       </div>
 

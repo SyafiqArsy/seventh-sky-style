@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/common/navbar";
+import Navbar from "@/components/common/navbar";
 import { HeroSection } from "@/features/home/hero-section";
 import { LatestRecommendationCard } from "@/features/home/latest-recommendation-card";
 import { GallerySection } from "@/components/common/gallery-section";

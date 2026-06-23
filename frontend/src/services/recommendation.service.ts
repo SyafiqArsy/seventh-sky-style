@@ -1,11 +1,16 @@
 import { api } from "./api";
 
 import {
-  RecommendationHistory,
-  GenerateRecommendationResponse,
+  RecommendationItem,
   RecommendationDetail,
   LatestRecommendation,
 } from "@/types/recommendation.types";
+
+export interface GenerateRecommendationResponse {
+  recommendation: {
+    id: string;
+  };
+}
 
 export const recommendationService = {
   async getLatest(): Promise<LatestRecommendation | null> {
@@ -18,7 +23,7 @@ export const recommendationService = {
   },
 
   async getHistory(): Promise<
-    RecommendationHistory[]
+    RecommendationItem[]
   > {
     const { data } =
       await api.get(

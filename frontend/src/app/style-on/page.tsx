@@ -12,6 +12,7 @@ import { recommendationService } from "@/services/recommendation.service";
 import { useStyleOnStore } from "@/store/style-on.store"; 
 
 import { ProfilePreview } from "@/components/common/profile-preview";
+import Navbar from "@/components/common/navbar";
 
 export default function StyleOnPage() {
   const [loading, setLoading] = useState(false);
@@ -81,8 +82,10 @@ export default function StyleOnPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl px-6 py-20">
-      <h1 className="text-5xl font-bold">Style On</h1>
+    <>
+      <Navbar />
+      <div className="container mx-auto max-w-5xl px-6 py-20">
+        <h1 className="text-5xl font-bold">Style On</h1>
 
       <p className="mt-4 text-zinc-500">
         Let AI find your perfect outfit.
@@ -128,5 +131,6 @@ export default function StyleOnPage() {
         </button>
       </div>
     </div>
+    </>
   );
 }

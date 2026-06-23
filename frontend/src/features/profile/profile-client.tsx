@@ -8,6 +8,8 @@ import { profileService } from "@/services/profile.service";
 
 import { masterService } from "@/services/master.service";
 
+import Navbar from "@/components/common/navbar";
+
 export default function ProfileClient() {
 const queryClient = useQueryClient();
 
@@ -103,11 +105,13 @@ if (
 }
 
   return (
-    <div className="container mx-auto max-w-3xl px-6 py-16">
+    <>
+      <Navbar />
+      <div className="container mx-auto max-w-3xl px-6 py-16">
 
-      <h1 className="text-4xl font-bold">
-        Profile
-      </h1>
+        <h1 className="text-4xl font-bold">
+          Profile
+        </h1>
 
         <div className="mt-8 space-y-6">
 
@@ -343,6 +347,7 @@ if (
             : "Save Changes"}
         </button>
 
-    </div>
+      </div>
+    </>
   );
 }

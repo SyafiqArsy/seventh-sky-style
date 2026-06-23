@@ -31,21 +31,27 @@ export const useAuthStore =
 
         user: null,
 
-        setToken: (token) =>
+        setToken: (token) => {
           set({
             accessToken: token,
-          }),
+          });
+          window.dispatchEvent(new Event('authChange'));
+        },
 
-        setUser: (user) =>
+        setUser: (user) => {
           set({
             user,
-          }),
+          });
+          window.dispatchEvent(new Event('authChange'));
+        },
 
-        logout: () =>
+        logout: () => {
           set({
             accessToken: null,
             user: null,
-          }),
+          });
+          window.dispatchEvent(new Event('authChange'));
+        },
       }),
       {
         name: "auth-storage",

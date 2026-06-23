@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 import { BodyTypesService } from './body-types.service';
 import { CreateBodyTypeDto } from './dto/create-body-type.dto';
 import { UpdateBodyTypeDto } from './dto/update-body-type.dto';
+
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @ApiTags('Body Types')
 @Controller('body-types')
@@ -28,13 +32,19 @@ export class BodyTypesController {
   }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Create a new body type' })
   @ApiResponse({ status: 201, description: 'Body type created successfully' })
   async create(@Body() createBodyTypeDto: CreateBodyTypeDto) {
     return this.bodyTypesService.create(createBodyTypeDto);
   }
 
-  @Put(':id')
+  @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Update a body type' })
   @ApiResponse({ status: 200, description: 'Body type updated successfully' })
   @ApiResponse({ status: 404, description: 'Body type not found' })
@@ -43,6 +53,9 @@ export class BodyTypesController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a body type' })
   @ApiResponse({ status: 204, description: 'Body type deleted successfully' })

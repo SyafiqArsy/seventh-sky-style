@@ -51,7 +51,7 @@ export default function RecommendationDetailClient({
           <Image
             src={
               firstItem.aiResult?.imageUrl ||
-              "/fashion/fashion-1.jpg"
+              "/recommendation/limit.jpg"
             }
             alt="AI Outfit"
             width={600}

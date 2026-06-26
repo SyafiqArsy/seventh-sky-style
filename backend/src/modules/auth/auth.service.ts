@@ -34,14 +34,23 @@ export class AuthService {
       10,
     );
 
-    await this.usersService.create({
+    const user = await this.usersService.create({
       name: registerDto.name,
       email: registerDto.email,
       password: hashedPassword,
     });
 
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken =
+      await this.jwtService.signAsync(payload);
+
     return {
-      message: 'User registered successfully',
+      accessToken,
     };
   }
 

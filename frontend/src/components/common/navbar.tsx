@@ -54,12 +54,20 @@ export default function Navbar() {
                 Logout
               </button>
             ) : (
-              <Link
-                href="/login"
-                className="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-blue-50"
-              >
-                Login
-              </Link>
+              <>
+                <Link
+                  href="/register"
+                  className="text-green-600 hover:text-green-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-green-50"
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/login"
+                  className="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-blue-50"
+                >
+                  Login
+                </Link>
+              </>
             )}
           </div>
         </div>
